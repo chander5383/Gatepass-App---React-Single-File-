@@ -1,108 +1,89 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  background: #f8f9fa;
+/* A4 sized single page style (print-friendly) */
+:root{
+  --brand:#0a4b76;
+  --muted:#666;
+  --border:#222;
+  --page-width:21cm;
+  --page-height:29.7cm;
+  --stamp-size:3cm; /* square stamp size */
 }
 
-.container {
-  width: 21cm;
-  min-height: 29.7cm;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  box-shadow: 0 0 10px #ccc;
-  position: relative;
+*{box-sizing:border-box}
+body{font-family:Inter, Arial, sans-serif;background:#f2f4f7;padding:20px;display:flex;justify-content:center}
+.page-wrap{width:var(--page-width);-webkit-print-color-adjust:exact}
+.gatepass{background:#fff;padding:14mm 12mm;min-height:var(--page-height);position:relative;border:1px #ddd solid;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
+
+.gp-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);padding-bottom:8px}
+.logo-left img{height:64px}
+.gp-title{text-align:center;flex:1}
+.company{font-weight:800;font-size:16px;color:var(--brand)}
+.place{font-weight:700;margin-top:2px}
+.gp-meta{width:260px;display:flex;flex-direction:column;gap:6px}
+.meta-row label{font-size:12px;color:var(--muted);font-weight:700}
+.meta-box{border:1px solid var(--border);padding:6px;background:#fafafa;font-weight:700}
+
+/* sections */
+.section{margin-top:12px}
+.details{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.details .col{display:flex;flex-direction:column}
+.details label{font-weight:700;font-size:13px}
+.details select,input{padding:6px;border:1px solid #cfd8df;border-radius:4px}
+
+/* items table */
+.items-section .items-header{display:flex;justify-content:space-between;align-items:center}
+.items-table{width:100%;border-collapse:collapse;margin-top:8px}
+.items-table thead th{background:#f7fbff;border:1px solid #c7d7e5;padding:8px;font-weight:700}
+.items-table td{border:1px solid #e2e8ee;padding:6px}
+.item-input{width:100%;padding:6px;border:1px solid #d0d7dd;border-radius:4px}
+.items-actions button{padding:6px 10px}
+button{background:var(--brand);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+button.secondary{background:#e9eef5;color:#0a4b76}
+
+/* remarks */
+.remarks textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #d0d7dd}
+
+/* qr & info */
+.qr-row{display:flex;gap:12px;align-items:center;margin-top:6px}
+.qr-box{width:110px;height:110px;border:1px solid #eef5fa;padding:6px;border-radius:6px;background:#fff}
+.small-info{font-size:12px;color:var(--muted)}
+
+/* dotted cut line */
+.cut-line{margin-top:12px;text-align:center;color:var(--muted);border-top:1px dashed #999;padding-top:6px}
+
+/* signature area */
+.sign-row{display:flex;gap:20px;margin-top:12px}
+.sign-col{flex:1;border:1px solid #e6eef5;padding:10px;border-radius:6px}
+.sign-title{font-weight:800;margin-bottom:6px}
+.stamp-box{width:var(--stamp-size);height:var(--stamp-size);border:2px dashed #999;margin-top:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.sign-line{margin-top:10px;font-weight:700}
+
+/* actions */
+.actions-row{display:flex;gap:12px;justify-content:flex-end;margin-top:14px}
+
+/* responsive smaller screens */
+@media (max-width:900px){
+  .details{grid-template-columns:repeat(2,1fr)}
+  .gp-meta{width:220px}
 }
 
-header {
-  display: flex;
-  align-items: center;
-  border-bottom: 2px solid black;
-  padding-bottom: 10px;
-}
-
-.logo img {
-  width: 90px;
-  height: auto;
-}
-
-.header-text {
-  flex: 1;
-  text-align: center;
-}
-
-h1 { font-size: 20px; margin: 0; }
-h2 { font-size: 18px; margin: 0; }
-h3 { margin: 5px 0; }
-
-.info, .transfer, .items, .security {
-  margin-top: 15px;
-  border: 1px solid #000;
-  padding: 10px;
-}
-
-.info .left, .info .right {
-  display: inline-block;
-  width: 48%;
-}
-
-label {
-  font-weight: bold;
-}
-
-input, select, textarea {
-  width: 60%;
-  margin: 5px;
-}
-
-.items table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.items th, .items td {
-  border: 1px solid #000;
-  text-align: center;
-  padding: 5px;
-}
-
-.buttons {
-  margin-top: 20px;
-  text-align: center;
-}
-
-button {
-  padding: 8px 16px;
-  margin: 5px;
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #003d82;
-}
-
-/* Background logo only visible in print */
-@media print {
-  body {
-    -webkit-print-color-adjust: exact;
+/* PRINT STYLES - watermark + single page fit */
+@media print{
+  body{background:white}
+  .page-wrap{box-shadow:none}
+  .gatepass{border:none;box-shadow:none;padding:12mm}
+  /* watermark centered only while printing */
+  .gatepass::before{
+    content:"";
+    position:absolute;
+    left:50%;top:40%;
+    transform:translate(-50%,-50%);
+    width:50%;height:50%;
+    background-image:url('https://gwtpl.co/logo.png');
+    background-repeat:no-repeat;background-position:center;background-size:contain;
+    opacity:0.06;z-index:0;
   }
-  .container::before {
-    content: "";
-    background: url('https://gwtpl.co/logo.png') center center no-repeat;
-    background-size: 50%;
-    opacity: 0.08;
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 0;
-  }
-  input, select, textarea, button {
-    border: none;
-  }
-  .buttons {
-    display: none;
-  }
+  /* ensure only gatepass printed */
+  button, .items-actions, .cut-line, .page-wrap { display: none !important; }
+  /* inputs -> plain text while printing */
+  input, select, textarea{border:none;background:transparent}
 }
