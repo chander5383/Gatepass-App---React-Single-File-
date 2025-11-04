@@ -24,7 +24,7 @@
   </header>
 
   <main class="layout">
-    <!-- History -->
+    <!-- History Panel -->
     <aside id="historyPanel" class="history-panel" aria-hidden="true">
       <h3>GatePass History</h3>
       <div class="hist-controls">
@@ -37,12 +37,12 @@
       <div id="historyList" class="history-list"></div>
     </aside>
 
-    <!-- Preview -->
+    <!-- Single Live Preview -->
     <section class="preview-wrap">
       <article id="previewCopy" class="preview-copy"></article>
     </section>
 
-    <!-- Editor -->
+    <!-- Editor Form -->
     <section class="editor">
       <div class="box header-box">
         <div class="header-left">
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <!-- Consignor/Consignee -->
+      <!-- Consignor / Consignee -->
       <div class="box section">
         <div class="section-title">Consignor / Consignee Details</div>
         <div class="grid-3">
@@ -86,9 +86,21 @@
             <input id="vehicleNo" placeholder="Vehicle No">
           </div>
         </div>
+
+        <div class="grid-3" style="margin-top:8px;">
+          <div class="field">
+            <label>Person Carrying</label>
+            <input id="personCarrying" placeholder="Name">
+          </div>
+          <div class="field">
+            <label>Authority Person</label>
+            <input id="authorityPerson" value="Sh." placeholder="Authority Person">
+          </div>
+          <div></div>
+        </div>
       </div>
 
-      <!-- Items -->
+      <!-- Items Table -->
       <div class="box section">
         <div class="section-title">Item Details</div>
         <div class="items-head">
@@ -131,7 +143,7 @@
         </div>
       </div>
 
-      <!-- Remarks -->
+      <!-- Remarks + QR -->
       <div class="box section remarks-qr">
         <div class="remarks">
           <div class="section-title">Remarks</div>
@@ -142,6 +154,23 @@
           <div class="section-title">Verification</div>
           <div id="qrBox" class="qrbox"></div>
           <div class="gen">Generated on: <span id="genOn"></span></div>
+        </div>
+      </div>
+
+      <!-- Signatures (kept simple) -->
+      <div class="box section signature-area">
+        <div class="section-title">Signatures</div>
+        <div class="sign-grid">
+          <div>
+            <label>Name</label><input id="issuedName" placeholder="Name">
+            <label>Designation</label><input id="issuedDesg" placeholder="Designation">
+            <label>Date</label><input id="issuedDate" type="date">
+          </div>
+          <div>
+            <label>Name</label><input id="receivedName" placeholder="Name">
+            <label>Designation</label><input id="receivedDesg" placeholder="Designation">
+            <label>Date</label><input id="receivedDate" type="date">
+          </div>
         </div>
       </div>
     </section>
