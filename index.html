@@ -1,80 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GWTPL Gate Pass</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GWTPL Gate Pass Generator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
-  <div class="container">
+  <div class="gatepass-container">
     <header>
-      <img src="https://gwtpl.co/logo.png" class="logo">
-      <div>
-        <h1>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h1>
-        <h2>ABOHAR</h2>
+      <img src="https://gwtpl.co/logo.png" class="logo-bg" alt="Logo">
+      <h1>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h1>
+      <h3>ABOHAR</h3>
+      <h2 id="voucherType">STOCK TRANSFER VOUCHER</h2>
+      <div class="info-line">
+        <span id="gatePassNumber">Gate Pass No: GWTPL/ABO/2025/001</span>
+        <span>Date: <input type="date" id="dateField" /></span>
       </div>
     </header>
 
-    <div class="gatepass-form">
-      <label>Gate Pass Type:</label>
-      <select id="voucherType">
-        <option>STOCK TRANSFER VOUCHER</option>
-        <option>Stock Voucher (Returnable Stock)</option>
-      </select>
+    <section class="details">
+      <div class="left">
+        <label>Consignor Unit :</label>
+        <select id="consignorUnit"></select>
+      </div>
+      <div class="right">
+        <label>Consignee Unit :</label>
+        <input type="text" value="GWTPL Abohar" readonly />
+      </div>
+    </section>
 
-      <label>Gate Pass No:</label>
-      <input type="text" id="gatePassNo" readonly>
-
-      <label>Date:</label>
-      <input type="date" id="date">
-
-      <label>Cluster:</label>
-      <select id="cluster"></select>
-
-      <label>Godown:</label>
-      <select id="godown"></select>
-
-      <label>Location:</label>
-      <input type="text" id="location" readonly>
-
+    <section class="transport">
       <label>Vehicle No:</label>
-      <input type="text" id="vehicleNo">
+      <input type="text" id="vehicleNo" placeholder="Enter Vehicle Number">
+      <label>Carried By:</label>
+      <input type="text" id="carriedBy" placeholder="Person Taking Material">
+    </section>
 
-      <h3>Item Details</h3>
-      <table id="itemTable">
+    <section class="items">
+      <table id="itemsTable">
         <thead>
           <tr>
-            <th>Sr.No</th>
+            <th>Sr. No.</th>
             <th>Item Name</th>
             <th>Qty</th>
-            <th>Serial/Tag No (if active)</th>
-            <th>Returnable</th>
+            <th>Serial No.</th>
+            <th>Tag No.</th>
           </tr>
         </thead>
-        <tbody id="itemBody"></tbody>
+        <tbody id="itemRows"></tbody>
       </table>
-      <button id="addItem">+ Add Item</button>
+      <button id="addItemBtn">+ Add Item</button>
+    </section>
 
-      <label>Authority Person:</label>
-      <input type="text" id="authority">
+    <section class="remarks">
+      <label>Remarks:</label>
+      <textarea id="remarks" placeholder="Enter any remarks..."></textarea>
+    </section>
 
-      <label>Issued By (Name):</label>
-      <input type="text" id="issuedBy">
-
+    <section class="issue">
+      <label>Issued By:</label>
+      <input type="text" id="issuedBy" placeholder="Enter Name">
       <label>Designation:</label>
-      <input type="text" id="designation">
+      <input type="text" id="designation" placeholder="Enter Designation">
+    </section>
 
-      <button id="saveBtn">Save to Sheet</button>
+    <p class="note">Goods are not for sale — only site to site transfer</p>
+
+    <section class="actions">
+      <button id="generateBtn">Generate Gate Pass</button>
       <button id="printBtn">Print</button>
-    </div>
+      <button id="resetBtn">Reset</button>
+    </section>
 
     <footer>
-      <p>Goods are not for sale — only site to site transfer</p>
+      <div class="sign">
+        <p>Consignor Unit</p>
+        <p>Sign: __________________</p>
+      </div>
+      <div class="sign">
+        <p>Security</p>
+        <p>Sign: __________________</p>
+      </div>
+      <div class="sign">
+        <p>Issued By</p>
+        <p>Sign: __________________</p>
+      </div>
+      <div class="sign">
+        <p>Consignee Unit (GWTPL Abohar)</p>
+        <p>Sign: __________________</p>
+      </div>
     </footer>
+
+    <div id="qrCode"></div>
+    <p id="timestamp"></p>
   </div>
 
-  <div id="printArea"></div>
   <script src="script.js"></script>
 </body>
 </html>
