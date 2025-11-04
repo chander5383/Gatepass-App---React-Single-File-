@@ -1,68 +1,80 @@
+let itemCount = 0;
 const appsScriptUrl = "https://script.google.com/macros/s/AKfycbzvsZ8xK0zB92FsZRF6d2ko2zn5qv7UuzL28arXuXuWeWJe_1yi5b0ytqLz9EGpkE-kUQ/exec";
 
-// Auto gate pass number
-function generateGatePass() {
-  const prefix = "GWTPL/ABO/2025/";
-  const num = Math.floor(Math.random() * 9000 + 1000);
-  document.getElementById("gatePassNo").value = prefix + num;
+window.onload = () => {
+  document.getElementById("date").valueAsDate = new Date();
+  generateGatePassNo();
+};
+
+function generateGatePassNo() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const count = Math.floor(Math.random() * 900 + 100);
+  document.getElementById("gatePassNo").value = `GWTPL/ABO/${year}/${count}`;
 }
-generateGatePass();
 
-// Add new item
-document.getElementById("addItem").addEventListener("click", () => {
-  const div = document.createElement("div");
-  div.className = "itemRow";
-  div.innerHTML = `
-    <input type="text" placeholder="Item Name">
-    <input type="number" placeholder="Qty">
-    <select>
-      <option>Nos</option>
-      <option>Kg</option>
-      <option>Ltr</option>
-    </select>
+function changeVoucherType() {
+  document.getElementById("voucherType").innerText = document.getElementById("category").value;
+}
+
+function addItem() {
+  itemCount++;
+  const tbody = document.querySelector("#itemTable tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${itemCount}</td>
+    <td><input type="text" class="itemName"></td>
+    <td><input type="text" class="qty"></td>
+    <td>
+      <select class="unit">
+        <option>Kg</option>
+        <option>Ltr</option>
+        <option>Nos</option>
+      </select>
+    </td>
+    <td><input type="text" class="serialNo"></td>
+    <td><input type="text" class="tagNo"></td>
   `;
-  document.getElementById("items").appendChild(div);
-});
+  tbody.appendChild(row);
+}
 
-// Save data to Google Sheet
-document.getElementById("saveBtn").addEventListener("click", async () => {
+function saveData() {
   const data = {
-    date: document.getElementById("date").value,
     gatePassNo: document.getElementById("gatePassNo").value,
-    type: document.getElementById("voucherType").value,
-    cluster: document.getElementById("cluster").value,
-    district: document.getElementById("district").value,
-    location: document.getElementById("location").value,
-    godown: document.getElementById("godown").value,
-    itemName: Array.from(document.querySelectorAll("#items .itemRow input:nth-child(1)")).map(i => i.value).join(", "),
-    qty: Array.from(document.querySelectorAll("#items .itemRow input:nth-child(2)")).map(i => i.value).join(", "),
-    unit: Array.from(document.querySelectorAll("#items .itemRow select")).map(i => i.value).join(", "),
-    remarks: document.getElementById("remarks").value,
-    vehicleNo: document.getElementById("vehicleNo").value,
-    personName: document.getElementById("personName").value,
+    date: document.getElementById("date").value,
+    category: document.getElementById("category").value,
+    consignor: document.getElementById("consignor").value,
+    consignee: document.getElementById("consignee").value,
     issuedBy: document.getElementById("issuedBy").value,
     designation: document.getElementById("designation").value,
-    consignorUnit: document.getElementById("godown").value,
-    consigneeUnit: "GWTPL ABOHAR"
+    vehicleNo: document.getElementById("vehicleNo").value,
+    person: document.getElementById("person").value,
+    remarks: document.getElementById("remarks").value,
+    outwardNo: document.getElementById("outwardNo").value,
+    outwardDate: document.getElementById("outwardDate").value,
+    securityName: document.getElementById("securityName").value,
+    items: []
   };
 
-  await fetch(appsScriptUrl, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(data)
+  document.querySelectorAll("#itemTable tbody tr").forEach(row => {
+    const item = {
+      name: row.querySelector(".itemName").value,
+      qty: row.querySelector(".qty").value,
+      unit: row.querySelector(".unit").value,
+      serialNo: row.querySelector(".serialNo").value,
+      tagNo: row.querySelector(".tagNo").value
+    };
+    data.items.push(item);
   });
 
-  alert("✅ Data saved to Google Sheet successfully!");
-});
-
-// Print gate pass
-document.getElementById("printBtn").addEventListener("click", () => {
-  window.print();
-});
-
-// QR Code
-const qr = new QRious({
-  element: document.getElementById("qrCode"),
-  value: "GWTPL GATE PASS SYSTEM",
-  size: 100
-});
+  fetch(appsScriptUrl, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+    .then(res => res.text())
+    .then(txt => {
+      alert("✅ Data saved successfully!");
+      generateGatePassNo();
+    })
+    .catch(err => alert("Error saving data: " + err));
+}
