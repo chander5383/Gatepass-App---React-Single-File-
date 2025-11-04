@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>GWTPL Gate Pass (v5)</title>
+  <title>GWTPL Abohar Gate Pass</title>
 
   <!-- Styles -->
   <link rel="stylesheet" href="style.css"/>
 
-  <!-- libs for PDF export -->
+  <!-- libs for PDF export (CDN required) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -16,7 +16,7 @@
   <div class="toolbar">
     <div class="brand">GWTPL Gate Pass</div>
     <div class="toolbar-actions">
-      <button id="openHistory">History</button>
+      <button id="openHistory" class="muted">History</button>
       <button id="saveBtn">Save & New</button>
       <button id="printBtn">Print</button>
       <button id="pdfBtn">Download PDF</button>
@@ -28,14 +28,14 @@
       <h3>Saved Gate Passes</h3>
       <div id="historyList"></div>
       <div class="hp-actions">
-        <button id="clearHistory">Clear Local History</button>
-        <button id="closeHistory">Close</button>
+        <button id="clearHistory" class="muted">Clear Local History</button>
+        <button id="closeHistory" class="muted">Close</button>
       </div>
     </aside>
 
     <div class="sheet-wrap">
       <div class="sheet" id="sheetRoot">
-        <!-- watermark for PDF/print -->
+        <!-- watermark -->
         <div class="watermark" id="watermark"></div>
 
         <!-- HEADER -->
@@ -71,12 +71,12 @@
         <section class="details">
           <div>
             <label>Consignor (Godown)</label>
-            <input id="godownManual" list="recentGodowns" placeholder="Enter godown name manually">
+            <input id="godownManual" placeholder="Enter godown name (manual)">
             <datalist id="recentGodowns"></datalist>
           </div>
           <div>
             <label>Consignee Unit</label>
-            <input id="consignee" placeholder="Consignee unit">
+            <input id="consignee" value="GWTPL Abohar" readonly>
           </div>
           <div>
             <label>Vehicle No</label>
@@ -107,24 +107,24 @@
           <thead>
             <tr>
               <th style="width:6%">Sr</th>
-              <th style="width:34%">Item Description</th>
-              <th style="width:12%">Tag No</th>
-              <th style="width:10%">Sr No</th>
+              <th style="width:36%">Item Description</th>
+              <th style="width:12%" id="thTag">Tag No</th>
+              <th style="width:10%" id="thSr">Sr No</th>
               <th style="width:10%">Qty</th>
               <th style="width:8%">Unit</th>
               <th style="width:14%">Remarks</th>
-              <th style="width:6%" class="print-hidden">Action</th>
+              <th style="width:8%" class="print-hidden">Action</th>
             </tr>
           </thead>
           <tbody id="itemsBody"></tbody>
           <tfoot>
-            <tr class="totals-row">
+            <tr>
               <td colspan="4" style="text-align:right;font-weight:700">Total Qty</td>
               <td id="totalQty" style="text-align:center;font-weight:700">0</td>
               <td colspan="3"></td>
             </tr>
-            <tr class="unit-subtotals">
-              <td colspan="8" id="unitSubtotals"></td>
+            <tr>
+              <td colspan="8" id="unitSubtotals" class="unit-subtotals"></td>
             </tr>
           </tfoot>
         </table>
@@ -138,15 +138,15 @@
         <!-- QR -->
         <div class="qr-row">
           <div class="qr-box" id="qrBox"></div>
-          <div style="font-size:13px;color:#666">
+          <div class="genNote">
             <div>Generated on: <span id="genOn"></span></div>
-            <div style="margin-top:6px">Scan QR for verification</div>
+            <div style="margin-top:6px;color:#666">Scan QR for verification</div>
           </div>
         </div>
 
         <div class="cut"></div>
 
-        <!-- SIGNATURE SECTIONS -->
+        <!-- SIGNATURE SECTIONS: separated, each with its own security fields -->
         <div class="sign-container">
           <!-- Consignee / Issued By -->
           <div class="sign-section">
@@ -157,20 +157,14 @@
                 <input id="issuedName" placeholder="Name">
                 <label>Designation</label>
                 <input id="issuedDesg" placeholder="Designation">
-                <label>Upload Signature</label>
-                <input type="file" accept="image/*" id="issuedSignFile">
-                <div class="sig-preview" id="issuedSigPreview"></div>
-                <div class="stamp">Stamp & Sign</div>
+                <div class="stamp">Stamp &amp; Sign</div>
               </div>
               <div class="security">
                 <label>Outward Register Sr. No.</label>
                 <input id="outwardReg" placeholder="Register Sr No">
                 <label>Date</label>
                 <input id="outwardDate" type="date">
-                <label>Security Stamp</label>
-                <input type="file" accept="image/*" id="issueSecSignFile">
-                <div class="sig-preview" id="issueSecSigPreview"></div>
-                <div class="stamp">Stamp & Sign (Security)</div>
+                <div class="stamp">Stamp (Security)</div>
               </div>
             </div>
           </div>
@@ -184,15 +178,23 @@
                 <input id="receivedName" placeholder="Name">
                 <label>Designation</label>
                 <input id="receivedDesg" placeholder="Designation">
-                <label>Upload Signature</label>
-                <input type="file" accept="image/*" id="receivedSignFile">
-                <div class="sig-preview" id="receivedSigPreview"></div>
-                <div class="stamp">Stamp & Sign</div>
+                <div class="stamp">Stamp &amp; Sign</div>
               </div>
               <div class="security">
                 <label>Inward Register Sr. No.</label>
                 <input id="inwardReg" placeholder="Register Sr No">
                 <label>Date (manual)</label>
                 <input id="inwardDate" placeholder="(write manually)">
-                <label>Security Stamp</label>
-                <input typ
+                <div class="stamp">Stamp (Security)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- sheet end -->
+    </div> <!-- sheet-wrap end -->
+  </div> <!-- main end -->
+
+  <script src="script.js"></script>
+</body>
+</html>
