@@ -1,150 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>GWTPL - Gate Pass (Updated)</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GWTPL Gate Pass</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="page-wrapper">
-    <div class="container">
-      <header class="header">
-        <div class="logo-block">
-          <img class="logo" src="https://gwtpl.co/logo.png" alt="GWTPL logo" onerror="this.src='images/logo.png'"/>
-        </div>
-        <div class="title-block">
-          <h1>GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</h1>
-          <h2>ABOHAR</h2>
-          <div class="sub">Goods are not for sale — site to site transfer only</div>
-        </div>
-        <div class="meta">
-          <div>Gate Pass No<br/><input id="passNo" readonly/></div>
-          <div>Date<br/><input id="date" type="date"/></div>
-        </div>
-      </header>
+  <div class="container">
+    <header>
+      <img src="https://gwtpl.co/logo.png" class="logo">
+      <div>
+        <h1>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h1>
+        <h2>ABOHAR</h2>
+      </div>
+    </header>
 
-      <main class="main">
-        <section class="left">
-          <label>Category
-            <select id="category">
-              <option>STOCK TRANSFER VOUCHER</option>
-              <option>Stock Voucher (Returnable Stock)</option>
-            </select>
-          </label>
+    <div class="gatepass-form">
+      <label>Gate Pass Type:</label>
+      <select id="voucherType">
+        <option>STOCK TRANSFER VOUCHER</option>
+        <option>Stock Voucher (Returnable Stock)</option>
+      </select>
 
-          <label>From (Consignor Unit)
-            <select id="fromSite"></select>
-          </label>
+      <label>Gate Pass No:</label>
+      <input type="text" id="gatePassNo" readonly>
 
-          <label>To (Consignee Unit)
-            <input id="toSite" value="GWTPL Muktsar-1"/>
-          </label>
+      <label>Date:</label>
+      <input type="date" id="date">
 
-          <label>Vehicle Number
-            <input id="vehicleNo" placeholder="Vehicle No."/>
-          </label>
+      <label>Cluster:</label>
+      <select id="cluster"></select>
 
-          <label>Person Carrying / Name
-            <input id="personName" placeholder="Name of person carrying goods"/>
-          </label>
+      <label>Godown:</label>
+      <select id="godown"></select>
 
-          <label>Issued By (Name)
-            <input id="issuedBy" placeholder="Name"/>
-          </label>
+      <label>Location:</label>
+      <input type="text" id="location" readonly>
 
-          <label>Issued By (Designation)
-            <input id="issuedDesg" placeholder="Designation"/>
-          </label>
+      <label>Vehicle No:</label>
+      <input type="text" id="vehicleNo">
 
-          <label>Authority Person
-            <input id="authority" placeholder="Authority person"/>
-          </label>
+      <h3>Item Details</h3>
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>Sr.No</th>
+            <th>Item Name</th>
+            <th>Qty</th>
+            <th>Serial/Tag No (if active)</th>
+            <th>Returnable</th>
+          </tr>
+        </thead>
+        <tbody id="itemBody"></tbody>
+      </table>
+      <button id="addItem">+ Add Item</button>
 
-          <label>Remarks
-            <input id="remarks" placeholder="Remarks"/>
-          </label>
+      <label>Authority Person:</label>
+      <input type="text" id="authority">
 
-          <label><input type="checkbox" id="showAdmin"/> Show Admin View</label>
-        </section>
+      <label>Issued By (Name):</label>
+      <input type="text" id="issuedBy">
 
-        <section class="right">
-          <div class="add-item">
-            <input id="itemName" placeholder="Item name"/>
-            <input id="itemQty" placeholder="Qty"/>
-            <label class="small"><input id="useSerial" type="checkbox"/> Serial & Tag</label>
-            <input id="itemSerial" placeholder="Serial no"/>
-            <input id="itemTag" placeholder="Tag no"/>
-            <label class="small"><input id="isReturnable" type="checkbox"/> Returnable</label>
-            <button id="addItemBtn">Add</button>
-          </div>
+      <label>Designation:</label>
+      <input type="text" id="designation">
 
-          <table id="itemsTable" class="items-table">
-            <thead>
-              <tr><th>Sr</th><th>Item</th><th>Qty</th><th class="ser">Serial</th><th class="ser">Tag</th><th>Returnable</th><th>Action</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-
-          <div class="qr-row">
-            <img id="qrImage" alt="QR" />
-            <div class="qr-label">Scan to verify</div>
-          </div>
-
-          <div class="actions">
-            <button id="saveBtn">Save to Sheet</button>
-            <button id="printBtn">Print</button>
-            <button id="clearBtn">Clear</button>
-          </div>
-
-          <div id="adminView" class="admin-view" style="display:none">
-            <h3>Admin — Saved Gatepasses</h3>
-            <input id="adminSearch" placeholder="Search pass no / site / person"/>
-            <table id="adminTable" class="items-table">
-              <thead><tr><th>PassNo</th><th>Date</th><th>From</th><th>To</th><th>Person</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <button id="exportCsv">Export CSV</button>
-          </div>
-        </section>
-      </main>
-
-      <footer class="footer">
-        <div class="left-footer">GWTPL — GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
-        <div class="right-footer">ABOHAR</div>
-      </footer>
+      <button id="saveBtn">Save to Sheet</button>
+      <button id="printBtn">Print</button>
     </div>
+
+    <footer>
+      <p>Goods are not for sale — only site to site transfer</p>
+    </footer>
   </div>
 
-  <!-- Print template -->
-  <div id="printTemplate" class="print-template" style="display:none">
-    <div class="print-watermark"></div>
-    <div class="pt-header">
-      <img src="https://gwtpl.co/logo.png" onerror="this.src='images/logo.png'"/>
-      <div class="pt-title">
-        <div class="big">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
-        <div class="big">ABOHAR</div>
-        <div id="ptCategory" class="muted"></div>
-      </div>
-      <div class="pt-meta">
-        <div id="ptPassNo" class="pt-passno"></div>
-        <div id="ptDate"></div>
-      </div>
-    </div>
-
-    <div class="pt-info" id="ptInfo"></div>
-
-    <table id="ptItems" class="pt-items"></table>
-
-    <div class="pt-steps">
-      <div>Checked By (Security): ____________________</div>
-      <div>Issued By (Name &amp; Designation): ____________________</div>
-      <div>Received By (Destination): ____________________</div>
-    </div>
-
-    <div class="pt-footer">Goods are not for sale — site to site transfer only</div>
-  </div>
-
+  <div id="printArea"></div>
   <script src="script.js"></script>
 </body>
 </html>
