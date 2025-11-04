@@ -1,278 +1,71 @@
-/* GWTPL Gate Pass v13.1
-   ✳ Single preview version (no double gatepass)
-   ✳ Advanced UI with perfect header alignment, QR centering, clean shadows, and responsive design */
-
-@page { size: A4; margin: 12mm; }
-
-:root {
-  --brand: #0a4b76;
-  --accent: #0f6ea8;
-  --bg: #f6f9fb;
-  --card: #ffffff;
-  --muted: #6b7780;
-  --border: #e8f3f7;
-  --radius: 12px;
-  --shadow: 0 6px 18px rgba(12, 44, 60, 0.08);
-  --font: "Inter", "Segoe UI", Arial, sans-serif;
-  --watermark: rgba(15, 110, 168, 0.08);
+/* style.css - v13.3 final */
+:root{
+  --brand:#0a4b76;
+  --muted:#6b7780;
+  --card:#fff;
+  --border:#e6f0f6;
 }
 
-/* Reset and base */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: var(--font);
-  background: linear-gradient(180deg, #f7fbfd, #f3f7fb);
-  color: #132;
-  -webkit-font-smoothing: antialiased;
-}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif; margin:0; background:#f6f8fa; color:#112;}
 
-/* Header topbar */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
-.brand {
-  font-weight: 800;
-  font-size: 16px;
-  color: var(--brand);
-}
-.actions .btn {
-  margin-left: 8px;
-}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;background:var(--brand);color:#fff;}
+.brand{font-weight:800}
+.actions button{margin-left:8px}
 
-/* Buttons */
-.btn {
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  padding: 8px 14px;
-}
-.btn.primary {
-  background: linear-gradient(180deg, var(--brand), #0b5e8a);
-  color: #fff;
-}
-.btn.muted {
-  background: #f2f6f8;
-  color: #133;
-}
+.layout{max-width:1100px;margin:18px auto;padding:0 12px;display:flex;flex-direction:column;gap:18px}
+.preview-wrap{display:flex;justify-content:center}
+.preview-copy{width:210mm;min-height:297mm;background:#fff;border-radius:8px;border:1px solid var(--border);padding:14mm;box-shadow:0 8px 22px rgba(3,20,29,0.06);overflow:hidden}
 
-/* Layout */
-.layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  padding: 18px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-.preview-wrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-.preview-copy {
-  width: 210mm;
-  max-width: 100%;
-  min-height: 297mm;
-  background: var(--card);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  padding: 14mm;
-  position: relative;
-  overflow: hidden;
-}
-.preview-copy::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: url('https://gwtpl.co/logo.png') center/contain no-repeat;
-  width: 60%;
-  height: 60%;
-  opacity: 0.08;
-  z-index: 0;
-  pointer-events: none;
-}
+.box{background:var(--card);border-radius:10px;padding:12px;border:1px solid var(--border);box-shadow:0 6px 18px rgba(3,20,29,0.04)}
+.header-box{display:flex;gap:12px;align-items:center}
+.logo{width:110px;height:auto}
+.header-center{flex:1;text-align:center}
+.company{font-weight:900;color:var(--brand);font-size:18px}
+.header-meta{width:240px;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.gpbox{background:#fafafa;padding:6px 8px;border-radius:6px;border:1px solid #ddd;font-weight:800;text-align:center}
 
-/* Form (Editor) */
-.editor {
-  width: 100%;
-  max-width: 960px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-.box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow);
-}
+/* grid */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.field label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #dcebf4;font-size:13px}
 
-/* Header box */
-.header-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-}
-.header-left img.logo {
-  width: 120px;
-  height: auto;
-  border-radius: 8px;
-}
-.header-center {
-  flex: 1;
-  text-align: center;
-}
-.company {
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--brand);
-}
-.place {
-  font-weight: 700;
-  color: #0b4a61;
-  margin-top: 2px;
-}
-.voucher {
-  font-weight: 900;
-  color: #0b4a61;
-  letter-spacing: 0.5px;
-  margin-top: 6px;
-}
-.header-meta {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-.gpbox {
-  border: 1px solid #222;
-  border-radius: 8px;
-  background: #fafafa;
-  padding: 8px;
-  font-weight: 800;
-  text-align: center;
-}
+/* table */
+.table-wrap{overflow:auto}
+.items-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+.items-table th,.items-table td{border:1px solid #dbeef8;padding:8px;text-align:center;vertical-align:middle}
+.items-table th{background:#f2fbff;font-weight:800;color:#094a63}
 
-/* Fields */
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.field label {
-  font-weight: 700;
-  font-size: 13px;
-  color: #0b2430;
-  display: block;
-  margin-bottom: 6px;
-}
-input, select, textarea {
-  width: 100%;
-  font-size: 13px;
-  border: 1px solid #dfe8ef;
-  border-radius: 8px;
-  padding: 10px;
-  outline: none;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(15, 110, 168, 0.1);
-}
+.items-table td input{width:100%;padding:6px;border-radius:6px;border:1px solid #e6f3fb}
 
-/* Items table */
-.table-wrap { overflow-x: auto; }
-.items-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-}
-.items-table th, .items-table td {
-  border: 1px solid var(--border);
-  padding: 8px;
-  text-align: center;
-}
-.items-table th {
-  background: #f6fbfd;
-  font-weight: 800;
-  color: #0b3e56;
-}
-.items-table tbody tr:nth-child(odd) {
-  background: rgba(15, 110, 168, 0.02);
-}
+/* hide columns by default */
+.col-tag,.col-sr,#thTag,#thSr{display:none}
 
-/* Remarks and QR */
-.remarks-qr {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-}
-.goods-note {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: 800;
-  background: #fff3f3;
-  color: #b00000;
-  border: 1px solid #ffd2d2;
-}
-.qr-block {
-  width: 200px;
-  text-align: center;
-}
-.qrbox {
-  width: 140px;
-  height: 140px;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin: 8px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow);
-}
+/* controls */
+.items-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.controls label{margin-right:8px}
+.btn{background:var(--brand);color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer}
+.btn.muted{background:#e6eef5;color:#123}
+.btn.primary{background:#006bb3}
 
-/* Signatures */
-.sign-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.stamp {
-  width: 3cm;
-  height: 3cm;
-  border: 2px dashed #a9bcc6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6b7f86;
-  font-size: 12px;
-  margin-top: 6px;
-}
+/* remarks & qr */
+.remarks-qr{display:flex;gap:12px;align-items:flex-start}
+.remarks{flex:1}
+.qr-block{width:180px;text-align:center}
+.qrbox{width:140px;height:140px;margin:8px auto;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
 
-/* Responsive */
-@media (max-width: 900px) {
-  .header-box { flex-direction: column; align-items: center; text-align: center; }
-  .header-meta { align-items: center; }
-  .grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .remarks-qr { flex-direction: column; align-items: center; }
+/* small */
+.section-title{font-weight:800;color:var(--brand);margin-bottom:6px}
+.sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.goods-note{margin-top:8px;padding:8px;border-radius:6px;background:#fff7f7;border:1px solid #ffdede;color:#a50000;font-weight:800;text-align:center}
+
+/* responsive */
+@media(max-width:900px){
+  .grid-3{grid-template-columns:repeat(2,1fr)}
+  .header-meta{align-items:center}
 }
-@media (max-width: 600px) {
-  .grid-3 { grid-template-columns: 1fr; }
-  .company { font-size: 16px; }
+@media(max-width:600px){
+  .grid-3{grid-template-columns:1fr}
+  .sign-grid{grid-template-columns:1fr}
+  .preview-copy{width:100%;padding:12px}
 }
