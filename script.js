@@ -1,360 +1,374 @@
-/* Gate Pass v3 script
- * - Save posts JSON to your Apps Script URL
- * - Auto local serial with fallback
- * - Dynamic dropdowns: expects Apps Script GET endpoint to return dropdown reference if available
- * - A4 print + PDF via html2pdf
- */
+/* script.js - Final Gate Pass v3 behaviour
+   Put this file alongside index.html and style.css
+   Edit APPS_SCRIPT_URL and REF_DATA_URL as needed.
+*/
 
-/* ====== CONFIG ====== */
+/* ===== CONFIG ===== */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvsZ8xK0zB92FsZRF6d2ko2zn5qv7UuzL28arXuXuWeWJe_1yi5b0ytqLz9EGpkE-kUQ/exec";
-// If you have a GET endpoint to fetch reference data (Cluster/District/Location/Godown) use it here.
-// Example expected JSON: [{Cluster:"Cluster-1", District:"Dist-A", Location:"Loc", "Name of Godown":"Godown-X"}, ...]
-const REF_DATA_URL = ""; // optional - set if you deploy a GET returning JSON of dropdown rows
+// Optional: a CSV / JSON endpoint that returns reference rows for dropdowns.
+// If you have published the sheet as CSV, set REF_DATA_URL to that csv link.
+// Example (replace with your published csv if available):
+const REF_DATA_URL = ""; // e.g. "https://docs.google.com/spreadsheets/d/e/XXX/pub?output=csv";
 
-/* ====== STATE ====== */
-let itemCount = 0;
-let items = [];
-let passKey = "gwtpl_v3_pass_count";
+/* ===== STATE ===== */
+const PASS_KEY = "gwtpl_v3_pass_count";
+let itemIdCounter = 0;
+let refRows = []; // will hold objects {Cluster, District, Location, "Name of Godown"}
 
-/* ====== DOM ====== */
-const gpNoEl = document.getElementById("gpNo");
-const gpDateEl = document.getElementById("gpDate");
-const gpTypeEl = document.getElementById("gpType");
+/* ===== DOM ===== */
+const gpNoEl = document.getElementById("gatePassNo");
+const issueDateEl = document.getElementById("issueDate");
 const clusterEl = document.getElementById("cluster");
 const districtEl = document.getElementById("district");
 const locationEl = document.getElementById("location");
-const godownEl = document.getElementById("godown");
+const consignorEl = document.getElementById("consignor");
 const godownOtherEl = document.getElementById("godownOther");
-const itemsTableBody = document.querySelector("#itemsTable tbody");
-const totalQtyEl = document.getElementById("totalQty");
-const genTimeEl = document.getElementById("genTime");
+const itemsTbody = document.querySelector("#itemTable tbody");
+const includeSerialTagCheckbox = document.getElementById("includeSerialTag");
+const serialNoInput = document.getElementById("serialNo");
+const tagNoInput = document.getElementById("tagNo");
 const qrBox = document.getElementById("qr");
 
-/* ====== INITIALIZE ====== */
+/* ===== INIT ===== */
 document.addEventListener("DOMContentLoaded", async () => {
-  // set date/time now
-  const now = new Date();
-  gpDateEl.value = toDatetimeLocal(now);
+  // set issue date default to today
+  const today = new Date();
+  issueDateEl.valueAsDate = today;
 
-  // try to fetch ref data if available
+  // init pass counter if not present
+  if (!localStorage.getItem(PASS_KEY)) localStorage.setItem(PASS_KEY, "1");
+
+  // fetch/ref data
   if (REF_DATA_URL) {
     try {
-      const r = await fetch(REF_DATA_URL);
-      const data = await r.json();
-      populateRefData(data);
+      const res = await fetch(REF_DATA_URL);
+      const text = await res.text();
+      parseCsvRef(text);
+      populateCluster();
     } catch (e) {
-      console.warn("Ref data fetch failed:", e);
-      fillDefaultRef();
+      console.warn("REF_DATA_URL fetch failed, using fallback", e);
+      useFallbackRef();
+      populateCluster();
     }
   } else {
-    fillDefaultRef();
+    useFallbackRef();
+    populateCluster();
   }
 
-  // init items with 1 row
+  // initial item row
   addItemRow();
 
-  // load passCount from localStorage or initialize
-  if (!localStorage.getItem(passKey)) {
-    localStorage.setItem(passKey, "1");
-  }
+  // initial gp no
   generateGatePassNo();
 
-  // set generated time text
-  genTimeEl.innerText = formatDateTime(new Date());
+  // events
+  document.getElementById("addItem").addEventListener("click", onAddItemClick);
+  document.getElementById("save").addEventListener("click", onSaveClick);
+  document.getElementById("print").addEventListener("click", () => window.print());
+  includeSerialTagCheckbox && includeSerialTagCheckbox.addEventListener("change", onToggleSerialTag);
 
-  // bind buttons
-  document.getElementById("addRow").addEventListener("click", addItemRow);
-  document.getElementById("clearItems").addEventListener("click", clearItems);
-  document.getElementById("saveBtn").addEventListener("click", saveAndNew);
-  document.getElementById("printBtn").addEventListener("click", () => window.print());
-  document.getElementById("pdfBtn").addEventListener("click", downloadPdf);
-
-  // cluster change chaining
   clusterEl.addEventListener("change", onClusterChange);
   districtEl.addEventListener("change", onDistrictChange);
-  godownEl.addEventListener("change", onGodownChange);
+  locationEl.addEventListener("change", onLocationChange);
 });
 
-/* ====== REF DATA population fallback ====== */
-function fillDefaultRef(){
-  // fallback clusters/godowns — you can adjust or load REF_DATA_URL
-  const rows = [
-    {Cluster:"Cluster-1", District:"Abohar", Location:"Abohar", "Name of Godown":"Abohar Godown 1"},
-    {Cluster:"Cluster-1", District:"Abohar", Location:"Abohar", "Name of Godown":"Abohar Godown 2"},
-    {Cluster:"Cluster-2", District:"Muktsar", Location:"Muktsar", "Name of Godown":"Muktsar Godown 1"},
-    {Cluster:"Cluster-3", District:"Malout", Location:"Malout", "Name of Godown":"Malout Godown 1"}
+/* ===== REF DATA HELPERS ===== */
+function parseCsvRef(csvText) {
+  // expects header: Cluster,District,IIFSM NF Code,Location,Name of Godown
+  const lines = csvText.trim().split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if (lines.length < 2) return useFallbackRef();
+  const headers = lines[0].split(",").map(h=>h.trim());
+  refRows = lines.slice(1).map(line=>{
+    const cols = line.split(",");
+    const obj = {};
+    headers.forEach((h,i)=> obj[h] = (cols[i]||"").trim());
+    // normalize keys if different
+    if (!obj["Name of Godown"] && obj["Name_of_Godown"]) obj["Name of Godown"] = obj["Name_of_Godown"];
+    return obj;
+  });
+}
+
+function useFallbackRef(){
+  refRows = [
+    { Cluster: "Cluster-1", District: "Abohar", "IIFSM NF Code": "", Location: "Abohar", "Name of Godown": "Abohar Godown 1" },
+    { Cluster: "Cluster-1", District: "Abohar", "IIFSM NF Code": "", Location: "Abohar", "Name of Godown": "Abohar Godown 2" },
+    { Cluster: "Cluster-3", District: "Malout", "IIFSM NF Code": "", Location: "Malout", "Name of Godown": "Malout Godown 1" },
+    { Cluster: "Cluster-2", District: "Muktsar", "IIFSM NF Code": "", Location: "Muktsar", "Name of Godown": "Muktsar Godown 1" }
   ];
-  populateRefData(rows);
 }
 
-function populateRefData(rows){
-  // build unique cluster list
-  const clusters = [...new Set(rows.map(r => r.Cluster))];
-  clusterEl.innerHTML = "<option value=''>--Select Cluster--</option>";
-  clusters.forEach(c => clusterEl.appendChild(optionEl(c)));
-
-  // store rows for filtering
-  window._refRows = rows;
+/* ===== DROPDOWN POPULATION ===== */
+function populateCluster(){
+  const clusters = [...new Set(refRows.map(r=>r.Cluster).filter(Boolean))];
+  clusterEl.innerHTML = "<option value=''>-- Select Cluster --</option>";
+  clusters.forEach(c => {
+    const opt = document.createElement("option"); opt.value = c; opt.textContent = c; clusterEl.appendChild(opt);
+  });
+  districtEl.innerHTML = "<option value=''>-- Select District --</option>";
+  locationEl.innerHTML = "<option value=''>-- Select Location --</option>";
+  consignorEl.innerHTML = "<option value=''>-- Select Consignor (Godown) --</option>";
 }
 
-function optionEl(val){ const o = document.createElement("option"); o.value = val; o.textContent = val; return o; }
-
+/* chain handlers */
 function onClusterChange(){
-  const cl = clusterEl.value;
-  districtEl.innerHTML = "<option value=''>--Select District--</option>";
-  locationEl.innerHTML = "<option value=''>--Select Location--</option>";
-  godownEl.innerHTML = "<option value=''>--Select Godown--</option>";
+  const c = clusterEl.value;
+  districtEl.innerHTML = "<option value=''>-- Select District --</option>";
+  locationEl.innerHTML = "<option value=''>-- Select Location --</option>";
+  consignorEl.innerHTML = "<option value=''>-- Select Consignor (Godown) --</option>";
   godownOtherEl.style.display = "none";
-
-  if (!cl) return;
-  const rows = (window._refRows||[]).filter(r=>r.Cluster===cl);
-  const districts = [...new Set(rows.map(r=>r.District))];
-  districts.forEach(d=>districtEl.appendChild(optionEl(d)));
+  if (!c) return;
+  const rows = refRows.filter(r=>r.Cluster === c);
+  const districts = [...new Set(rows.map(r=>r.District).filter(Boolean))];
+  districts.forEach(d=>districtEl.appendChild(createOption(d)));
 }
 
 function onDistrictChange(){
-  const cl = clusterEl.value, dist = districtEl.value;
-  locationEl.innerHTML = "<option value=''>--Select Location--</option>";
-  godownEl.innerHTML = "<option value=''>--Select Godown--</option>";
+  const c = clusterEl.value, d = districtEl.value;
+  locationEl.innerHTML = "<option value=''>-- Select Location --</option>";
+  consignorEl.innerHTML = "<option value=''>-- Select Consignor (Godown) --</option>";
   godownOtherEl.style.display = "none";
-
-  if (!dist) return;
-  const rows = (window._refRows||[]).filter(r=>r.Cluster===cl && r.District===dist);
-  const locs = [...new Set(rows.map(r=>r.Location))];
-  locs.forEach(l=>locationEl.appendChild(optionEl(l)));
+  if (!d) return;
+  const rows = refRows.filter(r=>r.Cluster===c && r.District===d);
+  const locs = [...new Set(rows.map(r=>r.Location).filter(Boolean))];
+  locs.forEach(l=>locationEl.appendChild(createOption(l)));
 }
 
-function onGodownChange(){
-  const cl = clusterEl.value, dist = districtEl.value, loc = locationEl.value;
+function onLocationChange(){
+  const c = clusterEl.value, d = districtEl.value, l = locationEl.value;
+  consignorEl.innerHTML = "<option value=''>-- Select Consignor (Godown) --</option>";
   godownOtherEl.style.display = "none";
-  const rows = (window._refRows||[]).filter(r=>r.Cluster===cl && r.District===dist && r.Location===loc);
-  const godowns = [...new Set(rows.map(r=>r["Name of Godown"]))];
-  godownEl.innerHTML = "<option value=''>--Select Godown--</option>";
-  godowns.forEach(g=>godownEl.appendChild(optionEl(g)));
-  // add Other option
-  const other = optionEl("Other");
-  godownEl.appendChild(other);
-  godownEl.addEventListener("change", ()=>{
-    if (godownEl.value==="Other") godownOtherEl.style.display = "block";
+  if (!l) return;
+  const rows = refRows.filter(r=>r.Cluster===c && r.District===d && r.Location===l);
+  const gods = [...new Set(rows.map(r=>r["Name of Godown"]).filter(Boolean))];
+  gods.forEach(g=>consignorEl.appendChild(createOption(g)));
+  // add Other
+  const otherOpt = createOption("Other"); otherOpt.value = "Other";
+  consignorEl.appendChild(otherOpt);
+  consignorEl.addEventListener("change", ()=>{
+    if (consignorEl.value === "Other") godownOtherEl.style.display = "block";
     else godownOtherEl.style.display = "none";
-  }, {once:true});
+  }, { once: true });
 }
 
-/* ====== Item rows handling ====== */
+function createOption(text){ const o = document.createElement("option"); o.value = text; o.textContent = text; return o; }
+
+/* ===== ITEMS table handling ===== */
+function onAddItemClick(e){
+  addItemRow();
+}
+
 function addItemRow(prefill = {}) {
-  itemCount++;
+  itemIdCounter++;
   const tr = document.createElement("tr");
-  tr.dataset.idx = itemCount;
+  tr.dataset.id = itemIdCounter;
   tr.innerHTML = `
-    <td class="cell-sr">${itemCount}</td>
-    <td><input class="item-desc item-input" placeholder="Item description" value="${escapeHtml(prefill.item||'')}"></td>
-    <td><input class="item-qty item-input" type="number" min="0" value="${prefill.qty||''}"></td>
+    <td class="sr">${getRowCount()+1}</td>
+    <td><input class="inp item-name" value="${escapeHtml(prefill.name||'')}" placeholder="Item description" /></td>
+    <td><input class="inp item-qty" type="number" min="0" value="${prefill.qty||''}" /></td>
     <td>
-      <select class="item-unit item-input">
+      <select class="item-unit inp">
         <option>Nos</option><option>Kg</option><option>Ltr</option><option>Bag</option><option>Box</option><option>Other</option>
       </select>
     </td>
-    <td><input class="item-remarks item-input" placeholder="Remarks (optional)" value="${escapeHtml(prefill.remarks||'')}"></td>
-    <td><button type="button" class="remove-btn">Remove</button></td>
+    <td><input class="inp item-remarks" value="${escapeHtml(prefill.remarks||'')}" placeholder="Remarks (optional)" /></td>
+    <td><button type="button" class="remove-row">Remove</button></td>
   `;
-  itemsTableBody.appendChild(tr);
+  itemsTbody.appendChild(tr);
 
   // bind remove
-  tr.querySelector(".remove-btn").addEventListener("click", ()=>{ tr.remove(); renumberItems(); computeTotal(); });
-
-  // update totals on qty change
-  tr.querySelector(".item-qty").addEventListener("input", computeTotal);
-  renumberItems();
-  computeTotal();
-}
-
-function renumberItems(){
-  let i=1;
-  document.querySelectorAll("#itemsTable tbody tr").forEach(tr=>{
-    tr.querySelector(".cell-sr").textContent = i++;
+  tr.querySelector(".remove-row").addEventListener("click", ()=>{
+    tr.remove();
+    renumberRows();
   });
-  itemCount = i-1;
-}
 
-function clearItems(){
-  itemsTableBody.innerHTML = "";
-  itemCount = 0;
-  addItemRow();
+  // update total on qty change
+  tr.querySelector(".item-qty").addEventListener("input", ()=>{ computeTotal(); });
+
+  renumberRows();
   computeTotal();
 }
 
+function getRowCount(){ return itemsTbody.querySelectorAll("tr").length; }
+function renumberRows(){
+  let i = 1;
+  itemsTbody.querySelectorAll("tr").forEach(tr=>{
+    tr.querySelector(".sr").textContent = i++;
+  });
+  computeTotal();
+}
 function computeTotal(){
   let sum = 0;
-  document.querySelectorAll(".item-qty").forEach(inp=>{
+  itemsTbody.querySelectorAll(".item-qty").forEach(inp=>{
     const v = parseFloat(inp.value) || 0;
     sum += v;
   });
-  totalQtyEl.textContent = sum;
+  document.getElementById("totalQty")?.remove?.();
+  // optionally show total elsewhere; in our layout CSS has footer cell id totalQty in earlier code — safe to set if exists
+  const tEl = document.getElementById("totalQty");
+  if(tEl) tEl.textContent = sum;
 }
 
-/* ====== Gate Pass No generation ====== */
+/* show/hide serial & tag inputs in the inline item add area */
+function onToggleSerialTag(){
+  const show = includeSerialTagCheckbox.checked;
+  serialNoInput.classList.toggle("hidden", !show);
+  tagNoInput.classList.toggle("hidden", !show);
+}
+
+/* ===== GATEPASS number handling (local) ===== */
 function generateGatePassNo(){
-  // try to get from localStorage counter
-  let cnt = parseInt(localStorage.getItem(passKey) || "1",10);
+  let cnt = parseInt(localStorage.getItem(PASS_KEY) || "1", 10);
   const year = new Date().getFullYear();
-  const serial = String(cnt).padStart(3,"0");
-  gpNoEl.textContent = `GWTPL/ABO/${year}/${serial}`;
+  const serial = String(cnt).padStart(3, "0");
+  gpNoEl.value = `GWTPL/ABO/${year}/${serial}`;
 }
 
-function incrementLocalPass(){
-  let cnt = parseInt(localStorage.getItem(passKey) || "1",10);
-  cnt = cnt + 1;
-  localStorage.setItem(passKey, String(cnt));
+function incrementPass(){
+  let cnt = parseInt(localStorage.getItem(PASS_KEY) || "1", 10);
+  cnt++;
+  localStorage.setItem(PASS_KEY, String(cnt));
   generateGatePassNo();
 }
 
-/* ====== Save -> POST to Apps Script ====== */
-async function saveAndNew(){
-  // validation
-  if (!validateForm()) return;
-
-  // build payload
-  const payload = buildPayload();
-
-  // disable save button to prevent double submits
-  const saveBtn = document.getElementById("saveBtn");
-  saveBtn.disabled = true;
-  saveBtn.textContent = "Saving...";
-
-  try {
-    // POST to Apps Script (no-cors may return opaque response)
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify(payload),
-      mode: "no-cors"
-    });
-
-    // success feedback
-    alert("✅ Gate Pass saved to Google Sheet.");
-    // increment local serial & reset form
-    incrementLocalPass();
-    resetForm();
-  } catch (err) {
-    console.error(err);
-    alert("⚠️ Save failed (network). Data saved locally as backup.");
-    // save to localStorage backup
-    const backup = JSON.parse(localStorage.getItem("gwtpl_v3_backups")||"[]");
-    backup.push(payload);
-    localStorage.setItem("gwtpl_v3_backups", JSON.stringify(backup));
-    incrementLocalPass();
-    resetForm();
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Save & New";
-  }
+/* ===== QR helper ===== */
+function setQR(text){
+  if(!qrBox) return;
+  const qrUrl = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" + encodeURIComponent(text);
+  qrBox.innerHTML = `<img src="${qrUrl}" alt="QR" />`;
 }
 
+/* ===== VALIDATION ===== */
 function validateForm(){
-  // require at least one item with name and qty
-  const hasItem = Array.from(document.querySelectorAll("#itemsTable tbody tr")).some(tr=>{
-    const name = tr.querySelector(".item-desc").value.trim();
+  // at least one item with name and qty
+  const rows = itemsTbody.querySelectorAll("tr");
+  if (rows.length === 0) { alert("Please add at least one item."); return false; }
+  let ok = false;
+  rows.forEach(tr=>{
+    const name = tr.querySelector(".item-name").value.trim();
     const qty = tr.querySelector(".item-qty").value.trim();
-    return name && qty;
+    if (name && qty && Number(qty) > 0) ok = true;
   });
-  if (!hasItem){ alert("Please add at least one item with quantity."); return false; }
-
-  if (!clusterEl.value){ if(!confirm("No Cluster selected. Continue?")) return false; }
-  if (!godownEl.value && !godownOtherEl.value){ if(!confirm("No Godown selected. Continue?")) return false; }
+  if (!ok) { alert("Please enter name and qty for at least one item."); return false; }
   return true;
 }
 
+/* ===== BUILD PAYLOAD & SAVE ===== */
 function buildPayload(){
-  const itemsArr = Array.from(document.querySelectorAll("#itemsTable tbody tr")).map(tr=>{
+  const items = Array.from(itemsTbody.querySelectorAll("tr")).map(tr=>{
     return {
-      sr: tr.querySelector(".cell-sr").textContent,
-      item: tr.querySelector(".item-desc").value.trim(),
+      sr: tr.querySelector(".sr").textContent,
+      name: tr.querySelector(".item-name").value.trim(),
       qty: tr.querySelector(".item-qty").value.trim(),
       unit: tr.querySelector(".item-unit").value,
       remarks: tr.querySelector(".item-remarks").value.trim()
     };
   });
 
-  const godownVal = (godownEl.value === "Other") ? (godownOtherEl.value.trim() || "Other") : (godownEl.value || godownOtherEl.value || "");
+  const consignorVal = (consignorEl.value === "Other") ? (godownOtherEl.value.trim() || "Other") : consignorEl.value;
 
   const payload = {
-    gatePassNo: gpNoEl.textContent,
-    dateTime: gpDateEl.value || new Date().toISOString(),
-    type: gpTypeEl.value,
+    gatePassNo: gpNoEl.value,
+    issueDate: issueDateEl.value || new Date().toISOString().slice(0,10),
+    type: document.getElementById("voucherType")?.textContent || document.getElementById("voucherType")?.value || "",
     cluster: clusterEl.value || "",
     district: districtEl.value || "",
     location: locationEl.value || "",
-    godown: godownVal,
-    consignee: document.getElementById("consignee").value,
+    consignor: consignorVal || "",
+    consignee: document.getElementById("consignee").value || "GWTPL Abohar",
     vehicleNo: document.getElementById("vehicleNo").value.trim(),
     personName: document.getElementById("personName").value.trim(),
-    refNo: document.getElementById("refNo").value.trim(),
-    generalRemarks: document.getElementById("generalRemarks").value.trim(),
-    items: itemsArr,
-    totalQty: totalQtyEl.textContent,
-    outwardRegNo: document.getElementById("outwardRegNo").value.trim(),
-    outwardDate: document.getElementById("inwardDate").value || "",
-    securityName: document.getElementById("securityName").value.trim(),
-    issuedBy: document.getElementById("issueName").value.trim(),
-    issuedDesg: document.getElementById("issueDesg").value.trim(),
-    issueDateTime: document.getElementById("issueDt").value || "",
+    authorityPerson: document.getElementById("authority").value.trim(),
+    refNo: document.getElementById("refNo")?.value || "",
+    generalRemarks: document.getElementById("remarks")?.value || document.getElementById("generalRemarks")?.value || "",
+    items,
+    totalQty: items.reduce((s,it)=> s + (parseFloat(it.qty)||0), 0),
+    // signatures & registers
+    issuedBy: document.getElementById("issuedByName")?.value || "",
+    issuedByDesig: document.getElementById("issuedByDesig")?.value || "",
+    outwardRegNo: document.getElementById("outwardNo")?.value || "",
+    outwardDate: document.getElementById("outwardDate")?.value || "",
+    issuedBySecName: document.getElementById("issueSecName")?.value || "",
+    issuedBySecNo: document.getElementById("issueSecNo")?.value || "",
+    issuedBySecDate: document.getElementById("issueSecDate")?.value || "",
+    receivedBy: document.getElementById("receivedByName")?.value || "",
+    receivedByDesig: document.getElementById("receivedByDesig")?.value || "",
+    inwardRegNo: document.getElementById("inwardNo")?.value || "",
+    inwardDate: document.getElementById("inwardDate")?.value || "",
+    receivedBySecName: document.getElementById("recSecName")?.value || "",
+    receivedBySecNo: document.getElementById("recSecNo")?.value || "",
+    receivedBySecDate: document.getElementById("recSecDate")?.value || "",
     generatedAt: new Date().toISOString()
   };
 
-  // set QR
-  setQRCode(`${payload.gatePassNo}|${payload.dateTime}|${payload.godown}|${itemsArr.length}`);
+  // generate QR content and set it
+  setQR(`${payload.gatePassNo}|${payload.issueDate}|${payload.consignor}|${items.length}`);
+
   return payload;
 }
 
-/* ====== RESET FORM ====== */
+async function onSaveClick(){
+  if (!validateForm()) return;
+
+  const payload = buildPayload();
+  const saveBtn = document.getElementById("save");
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
+
+  try {
+    // POST
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload),
+      mode: "no-cors" // apps script may be set to allow anonymous post; response opaque
+    });
+
+    alert("✅ Gate Pass saved successfully.");
+    // increment serial, reset form for next
+    incrementPass();
+    resetForm();
+  } catch (err) {
+    console.error("Save failed:", err);
+    // fallback: store backup locally
+    const bk = JSON.parse(localStorage.getItem("gwtpl_v3_backups")||"[]");
+    bk.push(payload);
+    localStorage.setItem("gwtpl_v3_backups", JSON.stringify(bk));
+    alert("⚠️ Save failed — data backed up locally. Next GatePass generated.");
+    incrementPass();
+    resetForm();
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save";
+  }
+}
+
+/* ===== RESET ===== */
 function resetForm(){
-  // reset items and inputs (keep date)
-  clearItems();
-  document.getElementById("generalRemarks").value = "";
+  // clear items and inputs (keep issue date as today)
+  itemsTbody.innerHTML = "";
+  itemIdCounter = 0;
+  addItemRow();
   document.getElementById("vehicleNo").value = "";
   document.getElementById("personName").value = "";
-  document.getElementById("refNo").value = "";
-  document.getElementById("outwardRegNo").value = "";
+  document.getElementById("authority").value = "Sh.";
+  document.getElementById("remarks").value = "";
+  document.getElementById("outwardNo").value = "";
+  document.getElementById("outwardDate").value = "";
+  document.getElementById("issueSecName").value = "";
+  document.getElementById("issueSecNo").value = "";
+  document.getElementById("issueSecDate").value = "";
+  document.getElementById("receivedByName").value = "";
+  document.getElementById("receivedByDesig").value = "";
+  document.getElementById("inwardNo").value = "";
   document.getElementById("inwardDate").value = "";
-  document.getElementById("securityName").value = "";
-  document.getElementById("issueName").value = "";
-  document.getElementById("issueDesg").value = "";
-  document.getElementById("issueDt").value = "";
-  // regenerate time and gp no shown set by local increment
-  gpDateEl.value = toDatetimeLocal(new Date());
-  genTimeEl.innerText = formatDateTime(new Date());
-  // regenerate QR placeholder
-  setQRCode("");
-}
-
-/* ====== QR ====== */
-function setQRCode(text){
+  document.getElementById("recSecName").value = "";
+  document.getElementById("recSecNo").value = "";
+  document.getElementById("recSecDate").value = "";
+  // reset gp date to today
+  issueDateEl.valueAsDate = new Date();
+  // clear QR
   qrBox.innerHTML = "";
-  const qr = new QRious({element: document.createElement("canvas"), value: text || " ", size: 110});
-  qrBox.appendChild(qr.element);
 }
 
-/* ====== PDF Download (html2pdf) ====== */
-function downloadPdf(){
-  // print only the gatepass element, single page A4
-  const element = document.getElementById("gatepass");
-  const opt = {
-    margin:       [0.4,0.6,0.4,0.6], // inches approx top,right,bottom,left
-    filename:     `${gpNoEl.textContent || 'gatepass'}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true },
-    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(element).save();
-}
-
-/* ====== HELPERS ====== */
-function toDatetimeLocal(date){
-  const pad = n => String(n).padStart(2,'0');
-  return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-function formatDateTime(d){
-  if(!d) return "";
-  return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
-}
-function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* ===== UTIL ===== */
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
