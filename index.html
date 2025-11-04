@@ -1,148 +1,116 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>GWTPL - Gate Pass (Updated)</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GWTPL ABOHAR - Gate Pass</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="page-wrapper">
-    <div class="container">
-      <header class="header">
-        <div class="logo-block">
-          <img class="logo" src="https://gwtpl.co/logo.png" alt="GWTPL logo" onerror="this.src='images/logo.png'"/>
-        </div>
-        <div class="title-block">
-          <h1>GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</h1>
-          <h2>ABOHAR</h2>
-          <div class="sub">Goods are not for sale — site to site transfer only</div>
-        </div>
-        <div class="meta">
-          <div>Gate Pass No<br/><input id="passNo" readonly/></div>
-          <div>Date<br/><input id="date" type="date"/></div>
-        </div>
-      </header>
-
-      <main class="main">
-        <section class="left">
-          <label>Category
-            <select id="category">
-              <option>STOCK TRANSFER VOUCHER</option>
-              <option>Stock Voucher (Returnable Stock)</option>
-            </select>
-          </label>
-
-          <label>From (Consignor Unit)
-            <select id="fromSite"></select>
-          </label>
-
-          <label>To (Consignee Unit)
-            <input id="toSite" value="GWTPL Muktsar-1"/>
-          </label>
-
-          <label>Vehicle Number
-            <input id="vehicleNo" placeholder="Vehicle No."/>
-          </label>
-
-          <label>Person Carrying / Name
-            <input id="personName" placeholder="Name of person carrying goods"/>
-          </label>
-
-          <label>Issued By (Name)
-            <input id="issuedBy" placeholder="Name"/>
-          </label>
-
-          <label>Issued By (Designation)
-            <input id="issuedDesg" placeholder="Designation"/>
-          </label>
-
-          <label>Authority Person
-            <input id="authority" placeholder="Authority person"/>
-          </label>
-
-          <label>Remarks
-            <input id="remarks" placeholder="Remarks"/>
-          </label>
-
-          <label><input type="checkbox" id="showAdmin"/> Show Admin View</label>
-        </section>
-
-        <section class="right">
-          <div class="add-item">
-            <input id="itemName" placeholder="Item name"/>
-            <input id="itemQty" placeholder="Qty"/>
-            <label class="small"><input id="useSerial" type="checkbox"/> Serial & Tag</label>
-            <input id="itemSerial" placeholder="Serial no"/>
-            <input id="itemTag" placeholder="Tag no"/>
-            <label class="small"><input id="isReturnable" type="checkbox"/> Returnable</label>
-            <button id="addItemBtn">Add</button>
-          </div>
-
-          <table id="itemsTable" class="items-table">
-            <thead>
-              <tr><th>Sr</th><th>Item</th><th>Qty</th><th class="ser">Serial</th><th class="ser">Tag</th><th>Returnable</th><th>Action</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-
-          <div class="qr-row">
-            <img id="qrImage" alt="QR" />
-            <div class="qr-label">Scan to verify</div>
-          </div>
-
-          <div class="actions">
-            <button id="saveBtn">Save to Sheet</button>
-            <button id="printBtn">Print</button>
-            <button id="clearBtn">Clear</button>
-          </div>
-
-          <div id="adminView" class="admin-view" style="display:none">
-            <h3>Admin — Saved Gatepasses</h3>
-            <input id="adminSearch" placeholder="Search pass no / site / person"/>
-            <table id="adminTable" class="items-table">
-              <thead><tr><th>PassNo</th><th>Date</th><th>From</th><th>To</th><th>Person</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody></tbody>
-            </table>
-            <button id="exportCsv">Export CSV</button>
-          </div>
-        </section>
-      </main>
-
-      <footer class="footer">
-        <div class="left-footer">GWTPL — GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
-        <div class="right-footer">ABOHAR</div>
-      </footer>
-    </div>
-  </div>
-
-  <!-- Print template -->
-  <div id="printTemplate" class="print-template" style="display:none">
-    <div class="print-watermark"></div>
-    <div class="pt-header">
-      <img src="https://gwtpl.co/logo.png" onerror="this.src='images/logo.png'"/>
-      <div class="pt-title">
-        <div class="big">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
-        <div class="big">ABOHAR</div>
-        <div id="ptCategory" class="muted"></div>
+  <div class="gatepass-container">
+    <header>
+      <div class="logo">
+        <img src="https://gwtpl.co/logo.png" alt="Company Logo">
       </div>
-      <div class="pt-meta">
-        <div id="ptPassNo" class="pt-passno"></div>
-        <div id="ptDate"></div>
+      <div class="header-text">
+        <h2>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h2>
+        <h4>ABOHAR</h4>
+        <h3><u>OUTWARD GATE PASS</u></h3>
       </div>
-    </div>
+    </header>
 
-    <div class="pt-info" id="ptInfo"></div>
+    <form id="gatepassForm">
+      <div class="section">
+        <div class="form-row">
+          <label>Gate Pass No:</label>
+          <input type="text" id="gatepassNo" name="gatepassNo" readonly>
+          <label>Date:</label>
+          <input type="date" id="issueDate" name="issueDate">
+        </div>
 
-    <table id="ptItems" class="pt-items"></table>
+        <div class="form-row">
+          <label>Cluster:</label>
+          <select id="cluster" name="cluster"></select>
+          <label>District:</label>
+          <select id="district" name="district"></select>
+          <label>Location:</label>
+          <select id="location" name="location"></select>
+        </div>
 
-    <div class="pt-steps">
-      <div>Checked By (Security): ____________________</div>
-      <div>Issued By (Name &amp; Designation): ____________________</div>
-      <div>Received By (Destination): ____________________</div>
-    </div>
+        <div class="form-row">
+          <label>Consignor (Godown):</label>
+          <select id="godown" name="godown">
+            <option value="">Select Godown</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="manualGodown" placeholder="Enter Godown Name" style="display:none;">
+        </div>
+      </div>
 
-    <div class="pt-footer">Goods are not for sale — site to site transfer only</div>
+      <h3 class="section-title">Item Details</h3>
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>Sr No</th>
+            <th>Item Name</th>
+            <th>Tagging No</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Remarks</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody id="itemBody"></tbody>
+      </table>
+
+      <div class="form-actions">
+        <button type="button" id="addItem">Add Item</button>
+      </div>
+
+      <div class="signature-section">
+        <div class="sig-box">
+          <h4>Issued By</h4>
+          <label>Outward Register Sr No:</label>
+          <input type="text" name="outwardSr">
+          <label>Date:</label>
+          <input type="date" name="outwardDate"><br>
+          <label>Name:</label><input type="text" name="issuedName">
+          <label>Designation:</label><input type="text" name="issuedDesig">
+          <div class="sign-stamp-box">Sign & Stamp</div>
+        </div>
+
+        <div class="sig-box">
+          <h4>Issued By (Security)</h4>
+          <label>Name:</label><input type="text" name="secName">
+          <label>Designation:</label><input type="text" name="secDesig">
+          <div class="sign-stamp-box">Sign & Stamp</div>
+        </div>
+      </div>
+
+      <div class="signature-section">
+        <div class="sig-box">
+          <h4>Received By</h4>
+          <label>Inward Register Sr No:</label>
+          <input type="text" name="inwardSr">
+          <label>Date:</label><input type="text" name="inwardDate" placeholder="To be filled manually"><br>
+          <label>Name:</label><input type="text" name="recvName">
+          <label>Designation:</label><input type="text" name="recvDesig">
+          <div class="sign-stamp-box">Sign & Stamp</div>
+        </div>
+
+        <div class="sig-box">
+          <h4>Received By (Security)</h4>
+          <label>Name:</label><input type="text" name="recvSecName">
+          <label>Designation:</label><input type="text" name="recvSecDesig">
+          <div class="sign-stamp-box">Sign & Stamp</div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" id="saveBtn">Save Gate Pass</button>
+        <button type="button" id="printBtn">Print</button>
+      </div>
+    </form>
   </div>
 
   <script src="script.js"></script>
