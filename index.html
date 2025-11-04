@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GWTPL - Gate Pass</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img class="logo" src="images/logo.png" alt="GWTPL logo" />
+      <div class="title-block">
+        <h1>GWTPL - Gate Pass Generator</h1>
+        <p class="sub">Goods are not for sale — site to site transfer only</p>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="controls">
+        <label>Category
+          <select id="category">
+            <option>STOCK TRANSFER VOUCHER</option>
+            <option>Stock Voucher (Returnable Stock)</option>
+          </select>
+        </label>
+
+        <label>Gate Pass No.
+          <input id="passNo" readonly />
+        </label>
+
+        <label>Date
+          <input id="date" type="date" />
+        </label>
+
+        <label>From (Consignor Unit)
+          <input id="fromSite" value="GWTPL Abohar" />
+        </label>
+
+        <label>To (Consignee Unit)
+          <input id="toSite" value="GWTPL Muktsar-1" />
+        </label>
+
+        <label>Authority Person
+          <input id="authority" placeholder="Authority Person" />
+        </label>
+
+        <label>Issued By
+          <input id="issuedBy" placeholder="Issued By" />
+        </label>
+
+        <label>Remarks
+          <input id="remarks" placeholder="Any remarks" />
+        </label>
+      </div>
+
+      <section class="items">
+        <div class="add-row">
+          <input id="itemName" placeholder="Item name" />
+          <input id="itemQty" placeholder="Qty" />
+          <label class="small"><input id="useSerial" type="checkbox" /> Serial & Tag</label>
+          <input id="itemSerial" placeholder="Serial no (optional)" />
+          <input id="itemTag" placeholder="Tag no (optional)" />
+          <button id="addItemBtn">Add Item</button>
+        </div>
+
+        <table id="itemsTable" class="items-table">
+          <thead>
+            <tr><th>Sr</th><th>Item</th><th>Qty</th><th class="ser">Serial</th><th class="ser">Tag</th><th>Action</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <div class="actions">
+        <button id="saveBtn">Save to Sheet</button>
+        <button id="printBtn">Print</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <small>GWTPL — Gate Pass system</small>
+    </footer>
+  </div>
+
+  <!-- Printable template (hidden) -->
+  <div id="printTemplate" class="print-template" style="display:none">
+    <div class="print-header">
+      <img src="images/logo.png" alt="logo" />
+      <div>
+        <h2>GWTPL - Gate Pass</h2>
+        <div id="ptCategory"></div>
+      </div>
+      <div id="ptPassNo" class="pt-passno"></div>
+    </div>
+    <div id="ptMeta"></div>
+    <table id="ptItems"></table>
+    <div class="pt-footer">Goods are not for sale — site to site transfer only</div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
