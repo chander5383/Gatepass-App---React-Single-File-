@@ -1,10 +1,7 @@
-/* v11 final script - grouped + QR + Google Sheet + print-4 + watermark */
+/* v12 script - responsive + QR + print-4 + printed-on + Goods note + Google Sheet */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRQnXv5VJe8Io0QSyNEddGvZazOFU_QVLdrT7tCWoP9D_0kIJKR6pXv68bs_6rMotFug/exec";
-const APPS_EXPECTS_JSON_RESPONSE = true;
 
-document.addEventListener('DOMContentLoaded', ()=> boot());
-
-/* helpers */
+document.addEventListener('DOMContentLoaded', boot);
 const el = id => document.getElementById(id);
 const qAll = sel => Array.from(document.querySelectorAll(sel));
 
@@ -18,7 +15,7 @@ function boot(){
   renderPreviewFromForm();
 }
 
-/* events */
+/* bind events */
 function bind(){
   el('btnAddRow').addEventListener('click', addRow);
   el('btnClearRows').addEventListener('click', clearRows);
@@ -37,21 +34,21 @@ function bind(){
   el('itemsBody').addEventListener('input', ()=> { computeTotal(); renderPreviewFromForm(); });
 }
 
-/* datalist */
+/* datalist recent consignors */
 function populateDatalist(){
   const map = JSON.parse(localStorage.getItem('gwtpl_godown_map')||'{}');
   const ds = el('recentGodowns'); ds.innerHTML='';
   Object.keys(map).reverse().forEach(k => { const o=document.createElement('option'); o.value=k; ds.appendChild(o); });
 }
 
-/* items */
+/* items logic */
 let itemCounter = 0;
 function addRow(prefill = {}){
   itemCounter++;
   const tbody = el('itemsBody');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td class="sr">${getRowCount()+1}</td>
+    <td class="sr"> ${getRowCount()+1} </td>
     <td><input class="itm-name" value="${escapeHTML(prefill.name||'')}" placeholder="Item description"></td>
     <td><input class="itm-tag" value="${escapeHTML(prefill.tag||'')}" placeholder="Tag No"></td>
     <td><input class="itm-sr" value="${escapeHTML(prefill.sr||'')}" placeholder="Sr No"></td>
@@ -67,7 +64,7 @@ function addRow(prefill = {}){
       </select>
     </td>
     <td><input class="itm-remarks" value="${escapeHTML(prefill.remarks||'')}" placeholder="Remarks"></td>
-    <td class="action-col"><button type="button" class="btn muted rm">Remove</button></td>
+    <td><button type="button" class="btn muted rm">Remove</button></td>
   `;
   tbody.appendChild(tr);
   tr.querySelector('.rm').addEventListener('click', ()=> { tr.remove(); renumber(); computeTotal(); renderPreviewFromForm(); });
@@ -79,7 +76,7 @@ function getRowCount(){ return qAll('#itemsBody tr').length; }
 function renumber(){ qAll('#itemsBody tr').forEach((tr,i)=> tr.querySelector('.sr').textContent = i+1); }
 function clearRows(){ el('itemsBody').innerHTML=''; addRow(); computeTotal(); renderPreviewFromForm(); }
 
-/* totals */
+/* totals & subtotals */
 function computeTotal(){
   const qtyEls = qAll('.itm-qty');
   const total = qtyEls.reduce((s,e)=> s + (parseFloat(e.value)||0), 0);
@@ -91,7 +88,7 @@ function computeTotal(){
   el('unitSubtotals').textContent = parts.length ? 'Subtotals — ' + parts.join(' | ') : '';
 }
 
-/* toggle */
+/* toggle Tag/Sr display */
 function toggleColumns(){
   const showTag = el('chkTag').checked;
   const showSr = el('chkSr').checked;
@@ -102,7 +99,7 @@ function toggleColumns(){
   renderPreviewFromForm();
 }
 
-/* GatePass numbering */
+/* GatePass number generator (year reset) */
 function generateLocalGP(){
   const now = new Date(); const year = now.getFullYear();
   const storedYear = localStorage.getItem('gwtpl_pass_year');
@@ -115,7 +112,7 @@ function generateLocalGP(){
 }
 function incrementLocal(){ let cnt = parseInt(localStorage.getItem('gwtpl_pass')||'1',10); cnt++; localStorage.setItem('gwtpl_pass', String(cnt)); generateLocalGP(); }
 
-/* validate */
+/* validation */
 function validateForm(){
   qAll('.error').forEach(e=> e.classList.remove('error'));
   if(!el('godownManual').value.trim()){ el('godownManual').classList.add('error'); el('godownManual').focus(); return false; }
@@ -124,7 +121,7 @@ function validateForm(){
   return true;
 }
 
-/* save */
+/* Save -> Google Sheet + local backup */
 async function onSave(){
   if(!validateForm()) return;
   const items = qAll('#itemsBody tr').map(tr => ({
@@ -164,7 +161,7 @@ async function onSave(){
     generatedAt: new Date().toISOString()
   };
 
-  // save mapping locally
+  // store consignor mapping locally
   const consignor = payload.consignor;
   if(consignor){
     const map = JSON.parse(localStorage.getItem('gwtpl_godown_map')||'{}');
@@ -172,7 +169,6 @@ async function onSave(){
     localStorage.setItem('gwtpl_godown_map', JSON.stringify(map));
   }
 
-  // try server
   try{
     const resp = await fetch(APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
     const j = await resp.json().catch(()=>null);
@@ -235,7 +231,7 @@ function printFromHistory(i){
   setTimeout(()=> window.print(), 400);
 }
 
-/* preview & build copy */
+/* render preview from form */
 function collectFormData(){
   const items = qAll('#itemsBody tr').map(tr => ({
     sr: tr.querySelector('.sr').textContent,
@@ -275,9 +271,8 @@ function collectFormData(){
   };
 }
 
-/* Build HTML for one copy (Office/Security label passed) */
+/* build HTML for one copy */
 function buildCopyHtml(data, label){
-  // header, details, table, remarks, signature, printed-on
   const itemsHtml = (data.items||[]).map(r => `
     <tr>
       <td style="border:1px solid #e9f4f9;padding:6px">${escapeHTML(r.sr||'')}</td>
@@ -359,6 +354,7 @@ function buildCopyHtml(data, label){
       <div style="flex:1;border:1px solid #e9f4f9;padding:8px;border-radius:6px">
         <div style="font-weight:700;color:#12323b;margin-bottom:6px">Remarks</div>
         <div style="min-height:40px">${escapeHTML(data.remarks||'')}</div>
+        <div style="margin-top:8px;text-align:center;color:#a50000;font-weight:800">Goods are not for sale — only site to site transfer</div>
       </div>
       <div style="width:180px;text-align:center">
         <div style="font-size:12px;color:#666;margin-bottom:8px">Generated on</div>
@@ -391,31 +387,20 @@ function buildCopyHtml(data, label){
   return `<div style="position:relative;z-index:1;padding-bottom:18px">${header}${details}${table}${remarks}${signatures}${printedOn}</div>`;
 }
 
-/* preview single copy built from form */
+/* generate preview for single page */
 function renderPreviewFromForm(){
   const data = collectFormData();
   const html = buildCopyHtml(data, 'Office Copy');
   el('previewCopy').innerHTML = html;
-  // generate QR for preview container placeholder
+  // generate QR in preview
   generateQRCode(el('previewCopy').querySelector('#qr-placeholder'), data);
 }
 
-/* build print container with four copies and show print dialog */
+/* build print area with 4 pages and append to body */
 function buildPrintAreaWithFourCopies(data){
-  // remove old print container if any
-  const old = document.getElementById('printContainer');
-  if(old) old.remove();
+  const old = document.getElementById('printContainer'); if(old) old.remove();
+  const printContainer = document.createElement('div'); printContainer.id = 'printContainer';
 
-  const printContainer = document.createElement('div');
-  printContainer.id = 'printContainer';
-  // set watermark background for print
-  printContainer.style.backgroundImage = `url("${escapeHTML(el('logoImg').src)}")`;
-  printContainer.style.backgroundRepeat = 'no-repeat';
-  printContainer.style.backgroundPosition = 'center';
-  printContainer.style.backgroundSize = '60%';
-  printContainer.style.opacity = '1';
-
-  // Order: Office, Security, Office, Security (4 pages)
   const labels = ['Office Copy','Security Copy','Office Copy','Security Copy'];
   labels.forEach(lbl => {
     const wrapper = document.createElement('div');
@@ -426,12 +411,13 @@ function buildPrintAreaWithFourCopies(data){
     wrapper.style.border = '1px solid var(--page-border)';
     wrapper.style.background = '#fff';
     wrapper.style.margin = '0';
+    wrapper.style.position = 'relative';
     wrapper.style.pageBreakAfter = 'always';
     wrapper.innerHTML = buildCopyHtml(data, lbl);
-    // generate QR in this wrapper
+    // QR
     const ph = wrapper.querySelector('#qr-placeholder');
     if(ph) generateQRCode(ph, data);
-    // printed-on bottom right inside wrapper
+    // printed on bottom-right (absolute)
     const pfoot = document.createElement('div');
     pfoot.style.position = 'absolute';
     pfoot.style.right = '12mm';
@@ -439,79 +425,63 @@ function buildPrintAreaWithFourCopies(data){
     pfoot.style.fontSize = '11px';
     pfoot.style.color = '#666';
     pfoot.textContent = `Printed on: ${formatPrintedOn(new Date())}`;
-    wrapper.style.position = 'relative';
     wrapper.appendChild(pfoot);
-
     printContainer.appendChild(wrapper);
   });
 
+  // add subtle background logo for print by inline style (so html2canvas picks it)
+  printContainer.style.backgroundImage = `url("${escapeHTML(el('logoImg').src)}")`;
+  printContainer.style.backgroundRepeat = 'no-repeat';
+  printContainer.style.backgroundPosition = 'center';
+  printContainer.style.backgroundSize = '60%';
   document.body.appendChild(printContainer);
   return printContainer;
 }
 
-/* print handler */
+/* print action */
 function printFourCopies(){
   if(!validateForm()) return;
   const data = collectFormData();
   const printArea = buildPrintAreaWithFourCopies(data);
-  // small delay to ensure DOM built
   setTimeout(()=> {
     window.print();
-    // cleanup
-    setTimeout(()=> { printArea.remove(); }, 800);
+    setTimeout(()=> { printArea.remove(); }, 900);
   }, 400);
 }
 
-/* PDF creation: canvas slicing to pages */
+/* PDF download - render printArea and convert */
 async function downloadPDFFourCopies(){
   if(!validateForm()) return;
   const data = collectFormData();
   const printArea = buildPrintAreaWithFourCopies(data);
-
-  // use html2canvas to render full printArea
+  // html2canvas full
   const canv = await html2canvas(printArea, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-  // remove temp print area
   printArea.remove();
 
   const img = canv.toDataURL('image/jpeg', 0.95);
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF('p','mm','a4');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
 
-  // convert canvas px to mm ratio
-  const pxPerMm = canv.width / (pageWidth * (96/25.4)); // approximation
-  // We'll slice canvas by height equivalent to one A4 page height in px
-  const a4PxHeight = Math.round(canv.height / (canv.height / (pageHeight * (96/25.4)))); // better approach below
-
-  // easier: compute scale to fit page width
-  const imgProps = { width: canv.width, height: canv.height };
-  const pdfImgWidth = pageWidth;
-  const pdfImgHeight = (imgProps.height * pageWidth) / imgProps.width;
-
-  // If img height <= pageHeight -> single page, else split
-  if(pdfImgHeight <= pageHeight + 1){
-    pdf.addImage(img, 'JPEG', 0, 0, pdfImgWidth, pdfImgHeight);
-  } else {
-    // slice vertically
-    const canvasW = canv.width;
-    const canvasH = canv.height;
-    // px height per pdf page
-    const pxPerPage = Math.floor(canvasW * (pageHeight / pageWidth));
-    let y = 0;
-    while(y < canvasH){
-      const sliceH = Math.min(pxPerPage, canvasH - y);
-      const tmp = document.createElement('canvas');
-      tmp.width = canvasW;
-      tmp.height = sliceH;
-      const ctx = tmp.getContext('2d');
-      ctx.drawImage(canv, 0, y, canvasW, sliceH, 0, 0, canvasW, sliceH);
-      const dataUrl = tmp.toDataURL('image/jpeg', 0.95);
-      const hInPdf = (sliceH * pdfImgWidth) / canvasW;
-      pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfImgWidth, hInPdf);
-      y += sliceH;
-      if(y < canvasH) pdf.addPage();
-    }
+  // slice the large canvas into A4-height images
+  const canvasW = canv.width;
+  const canvasH = canv.height;
+  const pxPerPage = Math.floor(canvasW * (pageH / pageW));
+  let y = 0;
+  let page = 0;
+  while(y < canvasH){
+    const sliceH = Math.min(pxPerPage, canvasH - y);
+    const tmp = document.createElement('canvas');
+    tmp.width = canvasW;
+    tmp.height = sliceH;
+    const ctx = tmp.getContext('2d');
+    ctx.drawImage(canv, 0, y, canvasW, sliceH, 0, 0, canvasW, sliceH);
+    const dataUrl = tmp.toDataURL('image/jpeg', 0.95);
+    const hInPdf = (sliceH * pageW) / canvasW;
+    if(page>0) pdf.addPage();
+    pdf.addImage(dataUrl, 'JPEG', 0, 0, pageW, hInPdf);
+    y += sliceH; page++;
   }
 
   const gp = el('metaGpNo').textContent.replaceAll('/','_') || 'GatePass';
@@ -525,23 +495,14 @@ function printFromHistory(i){
   setTimeout(()=> window.print(), 400);
 }
 
-/* generate QR using qrcodejs into a placeholder element */
+/* generate QR */
 function generateQRCode(targetEl, data){
   if(!targetEl) return;
   targetEl.innerHTML = '';
   const qrText = `GatePass No: ${data.gatePassNo}\nDate: ${data.date}\nConsignor: ${data.consignor}\nTotalQty: ${data.totalQty}`;
   try{
-    new QRCode(targetEl, {
-      text: qrText,
-      width: 110,
-      height: 110,
-      colorDark : "#000000",
-      colorLight : "#ffffff",
-      correctLevel : QRCode.CorrectLevel.H
-    });
-  }catch(e){
-    console.warn('QR fail', e);
-  }
+    new QRCode(targetEl, { text: qrText, width: 110, height: 110, colorDark:"#000", colorLight:"#fff", correctLevel: QRCode.CorrectLevel.H });
+  }catch(e){ console.warn('QR fail', e); }
 }
 
 /* reset */
