@@ -1,88 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GWTPL Gate Pass System</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GWTPL Gate Pass</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <header>
-      <img src="https://gwtpl.co/logo.png" class="logo" alt="Company Logo" />
-      <h1>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h1>
-      <h2>GATE PASS</h2>
-      <p>Goods are not for sale — Only site to site transfer</p>
+      <div class="logo"><img src="https://gwtpl.co/logo.png" alt="GWTPL Logo"></div>
+      <div class="header-text">
+        <h1>GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</h1>
+        <h3>ABOHAR</h3>
+        <h2 id="voucherType">STOCK TRANSFER VOUCHER</h2>
+      </div>
     </header>
 
-    <form id="gatepassForm">
-      <div class="section">
-        <label>Date:</label>
-        <input type="date" id="date" required />
+    <section class="info">
+      <div class="left">
         <label>Gate Pass No:</label>
-        <input type="text" id="gatePassNo" readonly />
+        <input type="text" id="gatePassNo" readonly>
       </div>
+      <div class="right">
+        <label>Date:</label>
+        <input type="date" id="date">
+      </div>
+    </section>
 
-      <div class="section">
+    <section class="transfer">
+      <div class="row">
         <label>Category:</label>
-        <select id="voucherType">
+        <select id="category" onchange="changeVoucherType()">
           <option>STOCK TRANSFER VOUCHER</option>
-          <option>Stock Voucher (Returnable Stock)</option>
+          <option>STOCK VOUCHER (RETURNABLE STOCK)</option>
         </select>
       </div>
-
-      <div class="section">
-        <label>Cluster:</label>
-        <select id="cluster"></select>
-        <label>District:</label>
-        <select id="district"></select>
-        <label>Location:</label>
-        <select id="location"></select>
-        <label>Godown:</label>
-        <select id="godown"></select>
-      </div>
-
-      <div class="section">
-        <h3>Item Details</h3>
-        <div id="items"></div>
-        <button type="button" id="addItem">+ Add Item</button>
-      </div>
-
-      <div class="section">
-        <label>Vehicle No:</label>
-        <input type="text" id="vehicleNo" placeholder="Enter Vehicle No" />
-        <label>Person Carrying:</label>
-        <input type="text" id="personName" placeholder="Name of Person" />
-      </div>
-
-      <div class="section">
-        <label>Issued By:</label>
-        <input type="text" id="issuedBy" placeholder="Issued By Name" />
-        <label>Designation:</label>
-        <input type="text" id="designation" placeholder="Designation" />
-      </div>
-
-      <div class="section">
-        <label>Remarks:</label>
-        <input type="text" id="remarks" placeholder="Enter Remarks" />
-      </div>
-
-      <div class="section">
+      <div class="row">
         <label>Consignor Unit:</label>
-        <input type="text" id="consignorUnit" placeholder="Select Godown" readonly />
+        <input type="text" id="consignor">
+      </div>
+      <div class="row">
         <label>Consignee Unit:</label>
-        <input type="text" id="consigneeUnit" value="GWTPL ABOHAR" readonly />
+        <input type="text" id="consignee" value="GWTPL ABOHAR" readonly>
       </div>
-
-      <div class="btn-section">
-        <button type="button" id="saveBtn">Save to Google Sheet</button>
-        <button type="button" id="printBtn">Print Gate Pass</button>
+      <div class="row">
+        <label>Issued By:</label>
+        <input type="text" id="issuedBy">
       </div>
-    </form>
+      <div class="row">
+        <label>Designation:</label>
+        <input type="text" id="designation">
+      </div>
+      <div class="row">
+        <label>Vehicle No:</label>
+        <input type="text" id="vehicleNo">
+      </div>
+      <div class="row">
+        <label>Person Carrying Material:</label>
+        <input type="text" id="person">
+      </div>
+      <div class="row">
+        <label>Remarks:</label>
+        <textarea id="remarks" rows="2"></textarea>
+      </div>
+    </section>
 
-    <div id="qrSection">
-      <canvas id="qrCode"></canvas>
+    <section class="items">
+      <h3>Item Details</h3>
+      <table id="itemTable">
+        <thead>
+          <tr>
+            <th>Sr No</th>
+            <th>Item Name</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Serial No</th>
+            <th>Tag No</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button onclick="addItem()">+ Add Item</button>
+    </section>
+
+    <section class="security">
+      <h3>Security Verification Section</h3>
+      <label>Outward Register Sr. No:</label>
+      <input type="text" id="outwardNo"><br>
+      <label>Date:</label>
+      <input type="date" id="outwardDate"><br>
+      <label>Security Name:</label>
+      <input type="text" id="securityName"><br><br>
+      <div class="sign">Sign & Stamp</div>
+    </section>
+
+    <div class="buttons">
+      <button onclick="saveData()">Save</button>
+      <button onclick="window.print()">Print</button>
     </div>
   </div>
 
