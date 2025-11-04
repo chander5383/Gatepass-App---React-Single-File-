@@ -3,197 +3,194 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>GWTPL Abohar Gate Pass</title>
+  <title>GWTPL Gate Pass (v7)</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css"/>
 
-  <!-- libs for PDF export (CDN required) -->
+  <!-- Libraries for PDF (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <div class="toolbar">
+  <header class="topbar">
     <div class="brand">GWTPL Gate Pass</div>
-    <div class="toolbar-actions">
+    <div class="actions">
       <button id="openHistory" class="muted">History</button>
       <button id="saveBtn">Save & New</button>
       <button id="printBtn">Print</button>
       <button id="pdfBtn">Download PDF</button>
     </div>
-  </div>
+  </header>
 
-  <div class="main">
-    <aside class="history-panel" id="historyPanel" aria-hidden="true">
+  <main class="layout">
+    <aside class="history" id="historyPanel" aria-hidden="true">
       <h3>Saved Gate Passes</h3>
       <div id="historyList"></div>
-      <div class="hp-actions">
-        <button id="clearHistory" class="muted">Clear Local History</button>
+      <div class="hist-controls">
+        <button id="clearHistory" class="muted">Clear</button>
         <button id="closeHistory" class="muted">Close</button>
       </div>
     </aside>
 
-    <div class="sheet-wrap">
-      <div class="sheet" id="sheetRoot">
-        <!-- watermark -->
+    <section class="paper-wrap">
+      <article class="paper" id="sheetRoot">
         <div class="watermark" id="watermark"></div>
 
-        <!-- HEADER -->
-        <div class="gp-header">
+        <!-- Header -->
+        <div class="header">
           <img class="logo" src="https://gwtpl.co/logo.png" alt="logo">
-          <div class="gp-title">
+          <div class="title">
             <div class="company">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
             <div class="place">ABOHAR</div>
-            <div id="voucherTitle">STOCK TRANSFER VOUCHER</div>
+            <div class="voucher">STOCK TRANSFER VOUCHER</div>
           </div>
           <div class="meta">
-            <div>
-              <label>Gate Pass No</label>
-              <div id="metaGpNo" class="box"></div>
-            </div>
-            <div>
-              <label>Date</label>
-              <input id="metaDate" type="date">
-            </div>
-            <div>
-              <label>Type</label>
-              <select id="metaType" class="print-hidden">
-                <option>STOCK TRANSFER VOUCHER</option>
-                <option>STOCK VOUCHER (RETURNABLE STOCK)</option>
-                <option>RETURN</option>
-                <option>TRANSFER</option>
-              </select>
-            </div>
+            <label>Gate Pass No</label>
+            <div id="metaGpNo" class="gpbox"></div>
+
+            <label style="margin-top:8px">Date</label>
+            <input id="metaDate" type="date">
+
+            <label style="margin-top:8px">Type</label>
+            <select id="metaType" class="hidden-print">
+              <option>STOCK TRANSFER VOUCHER</option>
+              <option>STOCK VOUCHER (RETURNABLE STOCK)</option>
+              <option>RETURN</option>
+              <option>TRANSFER</option>
+            </select>
           </div>
         </div>
 
-        <!-- DETAILS -->
-        <section class="details">
-          <div>
+        <!-- Details -->
+        <div class="details">
+          <div class="field">
             <label>Consignor (Godown)</label>
             <input id="godownManual" placeholder="Enter godown name (manual)">
             <datalist id="recentGodowns"></datalist>
           </div>
-          <div>
+
+          <div class="field">
             <label>Consignee Unit</label>
             <input id="consignee" value="GWTPL Abohar" readonly>
           </div>
-          <div>
+
+          <div class="field">
             <label>Vehicle No</label>
             <input id="vehicleNo" placeholder="Vehicle No">
           </div>
-          <div>
+
+          <div class="field">
             <label>Person Carrying</label>
             <input id="personCarrying" placeholder="Name">
           </div>
-          <div>
+
+          <div class="field">
             <label>Authority Person</label>
             <input id="authorityPerson" value="Sh." placeholder="Authority Person">
           </div>
-        </section>
+        </div>
 
-        <!-- ITEMS header -->
+        <!-- Items -->
         <div class="items-head">
-          <h3>Item Details</h3>
-          <div class="items-controls">
+          <h4>Item Details</h4>
+          <div class="controls">
             <label><input type="checkbox" id="chkTag"> Tag No</label>
             <label><input type="checkbox" id="chkSr"> Sr No</label>
-            <button id="btnAddRow" type="button">+ Add Item</button>
-            <button id="btnClearRows" type="button" class="secondary">Clear Items</button>
+            <button id="btnAddRow" class="btn">+ Add Item</button>
+            <button id="btnClearRows" class="btn secondary">Clear Items</button>
           </div>
         </div>
 
-        <table class="items-table" id="itemsTable" aria-label="Items table">
+        <table class="items-table" id="itemsTable">
           <thead>
             <tr>
-              <th style="width:6%">Sr</th>
-              <th style="width:36%">Item Description</th>
-              <th style="width:12%" id="thTag">Tag No</th>
-              <th style="width:10%" id="thSr">Sr No</th>
-              <th style="width:10%">Qty</th>
-              <th style="width:8%">Unit</th>
-              <th style="width:14%">Remarks</th>
-              <th style="width:8%" class="print-hidden">Action</th>
+              <th>Sr</th>
+              <th>Item Description</th>
+              <th id="thTag">Tag No</th>
+              <th id="thSr">Sr No</th>
+              <th>Qty</th>
+              <th>Unit</th>
+              <th>Remarks</th>
+              <th class="hidden-print">Action</th>
             </tr>
           </thead>
-          <tbody id="itemsBody"></tbody>
+          <tbody id="itemsBody">
+            <!-- rows inserted by JS -->
+          </tbody>
           <tfoot>
             <tr>
-              <td colspan="4" style="text-align:right;font-weight:700">Total Qty</td>
-              <td id="totalQty" style="text-align:center;font-weight:700">0</td>
+              <td colspan="4" class="text-right"><strong>Total Qty</strong></td>
+              <td id="totalQty" class="text-center">0</td>
               <td colspan="3"></td>
             </tr>
             <tr>
-              <td colspan="8" id="unitSubtotals" class="unit-subtotals"></td>
+              <td colspan="8" id="unitSubtotals" class="subtotals"></td>
             </tr>
           </tfoot>
         </table>
 
-        <!-- Remarks -->
-        <section class="remarks">
-          <label>Remarks</label>
-          <textarea id="remarks" rows="2" placeholder="Any remarks..."></textarea>
-        </section>
-
-        <!-- QR -->
-        <div class="qr-row">
-          <div class="qr-box" id="qrBox"></div>
-          <div class="genNote">
-            <div>Generated on: <span id="genOn"></span></div>
-            <div style="margin-top:6px;color:#666">Scan QR for verification</div>
+        <!-- Remarks & QR -->
+        <div class="notes-qr">
+          <div class="remarks">
+            <label>Remarks</label>
+            <textarea id="remarks" rows="2" placeholder="Any remarks..."></textarea>
+          </div>
+          <div class="qr">
+            <div id="qrBox" class="qrbox"></div>
+            <div class="gen">Generated on: <span id="genOn"></span><br><small>Scan QR for verification</small></div>
           </div>
         </div>
 
-        <div class="cut"></div>
+        <div class="cutline">Security Copy / Office Copy</div>
 
-        <!-- SIGNATURE SECTIONS: separated, each with its own security fields -->
-        <div class="sign-container">
+        <!-- Signature Sections: each section has two columns -->
+        <div class="sign-blocks">
           <!-- Consignee / Issued By -->
-          <div class="sign-section">
-            <h4>Consignee / Issued By</h4>
+          <section class="sign-section">
+            <h5>Consignee / Issued By</h5>
             <div class="sign-grid">
-              <div class="party">
-                <label>Name</label>
-                <input id="issuedName" placeholder="Name">
-                <label>Designation</label>
-                <input id="issuedDesg" placeholder="Designation">
+              <div class="col">
+                <div class="col-title">For Authorised Person</div>
+                <label>Name</label><input id="issuedName" placeholder="Name">
+                <label>Designation</label><input id="issuedDesg" placeholder="Designation">
+                <label>Date</label><input id="issuedDate" type="date">
                 <div class="stamp">Stamp &amp; Sign</div>
               </div>
-              <div class="security">
-                <label>Outward Register Sr. No.</label>
-                <input id="outwardReg" placeholder="Register Sr No">
-                <label>Date</label>
-                <input id="outwardDate" type="date">
+              <div class="col">
+                <div class="col-title">For Security</div>
+                <label>Name</label><input id="issueSecName" placeholder="Name">
+                <label>Register Sr. No.</label><input id="issueSecReg" placeholder="Register Sr No">
+                <label>Date</label><input id="issueSecDate" type="date">
                 <div class="stamp">Stamp (Security)</div>
               </div>
             </div>
-          </div>
+          </section>
 
           <!-- Consignor / Received By -->
-          <div class="sign-section">
-            <h4>Consignor / Received By</h4>
+          <section class="sign-section">
+            <h5>Consignor / Received By</h5>
             <div class="sign-grid">
-              <div class="party">
-                <label>Name</label>
-                <input id="receivedName" placeholder="Name">
-                <label>Designation</label>
-                <input id="receivedDesg" placeholder="Designation">
+              <div class="col">
+                <div class="col-title">For Authorised Person</div>
+                <label>Name</label><input id="receivedName" placeholder="Name">
+                <label>Designation</label><input id="receivedDesg" placeholder="Designation">
+                <label>Date</label><input id="receivedDate" type="date">
                 <div class="stamp">Stamp &amp; Sign</div>
               </div>
-              <div class="security">
-                <label>Inward Register Sr. No.</label>
-                <input id="inwardReg" placeholder="Register Sr No">
-                <label>Date (manual)</label>
-                <input id="inwardDate" placeholder="(write manually)">
+              <div class="col">
+                <div class="col-title">For Security</div>
+                <label>Name</label><input id="recSecName" placeholder="Name">
+                <label>Register Sr. No.</label><input id="recSecReg" placeholder="Register Sr No">
+                <label>Date (manual)</label><input id="recSecDate" placeholder="(write manually)">
                 <div class="stamp">Stamp (Security)</div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
-      </div> <!-- sheet end -->
-    </div> <!-- sheet-wrap end -->
-  </div> <!-- main end -->
+      </article>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
