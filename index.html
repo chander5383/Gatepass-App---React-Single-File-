@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GWTPL Gate Pass (v11)</title>
+  <title>GWTPL Gate Pass (v12)</title>
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- QR + PDF libraries (CDN) -->
+  <!-- QR + PDF libs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -24,7 +24,7 @@
   </header>
 
   <main class="layout">
-    <!-- history panel -->
+    <!-- History -->
     <aside id="historyPanel" class="history-panel" aria-hidden="true">
       <h3>GatePass History</h3>
       <div class="hist-controls">
@@ -37,17 +37,17 @@
       <div id="historyList" class="history-list"></div>
     </aside>
 
-    <!-- MAIN: preview single gatepass page (what user sees) -->
+    <!-- Preview (single page visible on screen) -->
     <section class="preview-wrap">
-      <div id="previewCopy" class="preview-copy"></div>
+      <article id="previewCopy" class="preview-copy"></article>
     </section>
 
-    <!-- Editor form on right/under (grouped sections) -->
+    <!-- Editor form -->
     <section class="editor">
-      <!-- header -->
-      <article class="box header-box">
+      <!-- Header form -->
+      <div class="box header-box">
         <div class="header-left">
-          <img class="logo" id="logoImg" src="https://gwtpl.co/logo.png" alt="logo">
+          <img id="logoImg" class="logo" src="https://gwtpl.co/logo.png" alt="logo">
         </div>
         <div class="header-center">
           <div class="company">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
@@ -67,15 +67,15 @@
             <option>TRANSFER</option>
           </select>
         </div>
-      </article>
+      </div>
 
-      <!-- Section 1 -->
-      <article class="box section">
+      <!-- Consignor / Consignee -->
+      <div class="box section">
         <div class="section-title">Consignor / Consignee Details</div>
         <div class="grid-3">
           <div class="field">
             <label>Consignor (Godown)</label>
-            <input id="godownManual" placeholder="Enter godown name (manual)">
+            <input id="godownManual" list="recentGodowns" placeholder="Enter godown name (manual)">
             <datalist id="recentGodowns"></datalist>
           </div>
           <div class="field">
@@ -87,7 +87,8 @@
             <input id="vehicleNo" placeholder="Vehicle No">
           </div>
         </div>
-        <div class="grid-3" style="margin-top:10px;">
+
+        <div class="grid-3" style="margin-top:8px;">
           <div class="field">
             <label>Person Carrying</label>
             <input id="personCarrying" placeholder="Name">
@@ -98,10 +99,10 @@
           </div>
           <div></div>
         </div>
-      </article>
+      </div>
 
-      <!-- Section 2 -->
-      <article class="box section">
+      <!-- Items -->
+      <div class="box section">
         <div class="section-title">Item Details</div>
         <div class="items-head">
           <div class="controls">
@@ -114,58 +115,61 @@
           </div>
         </div>
 
-        <table class="items-table" id="itemsTable">
-          <thead>
-            <tr>
-              <th style="width:6%">Sr</th>
-              <th style="width:44%">Item Description</th>
-              <th id="thTag" style="width:12%">Tag No</th>
-              <th id="thSr" style="width:10%">Sr No</th>
-              <th style="width:8%">Qty</th>
-              <th style="width:8%">Unit</th>
-              <th style="width:12%">Remarks</th>
-              <th style="width:8%" class="action-col">Action</th>
-            </tr>
-          </thead>
-          <tbody id="itemsBody"></tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4" class="text-right"><strong>Total Qty</strong></td>
-              <td id="totalQty" class="text-center">0</td>
-              <td colspan="3"></td>
-            </tr>
-            <tr>
-              <td colspan="8" id="unitSubtotals" class="subtotals"></td>
-            </tr>
-          </tfoot>
-        </table>
-      </article>
+        <div class="table-wrap">
+          <table class="items-table" id="itemsTable" aria-label="Items Table">
+            <thead>
+              <tr>
+                <th class="w-sr">Sr</th>
+                <th class="w-desc">Item Description</th>
+                <th class="w-tag" id="thTag">Tag No</th>
+                <th class="w-srno" id="thSr">Sr No</th>
+                <th class="w-qty">Qty</th>
+                <th class="w-unit">Unit</th>
+                <th class="w-remarks">Remarks</th>
+                <th class="w-action">Action</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-right"><strong>Total Qty</strong></td>
+                <td id="totalQty" class="text-center">0</td>
+                <td colspan="3"></td>
+              </tr>
+              <tr>
+                <td colspan="8" id="unitSubtotals" class="subtotals"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
 
-      <!-- Section 3 -->
-      <article class="box section remarks-qr">
+      <!-- Remarks + QR -->
+      <div class="box section remarks-qr">
         <div class="remarks">
           <div class="section-title">Remarks</div>
           <textarea id="remarks" rows="3" placeholder="Any remarks..."></textarea>
+          <div class="goods-note" id="goodsNote">Goods are not for sale — only site to site transfer</div>
         </div>
         <div class="qr-block">
           <div class="section-title">Verification</div>
           <div id="qrBox" class="qrbox"></div>
           <div class="gen">Generated on: <span id="genOn"></span></div>
         </div>
-      </article>
+      </div>
 
-      <!-- signatures -->
-      <article class="box section signature-area">
+      <!-- Signatures -->
+      <div class="box section signature-area">
         <div class="section-title">Consignee / Issued By</div>
         <div class="sign-grid">
-          <div class="col">
+          <div>
             <div class="col-title">For Authorised Person</div>
             <label>Name</label><input id="issuedName" placeholder="Name">
             <label>Designation</label><input id="issuedDesg" placeholder="Designation">
             <label>Date</label><input id="issuedDate" type="date">
             <div class="stamp">Stamp &amp; Sign</div>
           </div>
-          <div class="col">
+          <div>
             <div class="col-title">For Security</div>
             <label>Name</label><input id="issueSecName" placeholder="Name">
             <label>Register Sr. No.</label><input id="issueSecReg" placeholder="Register Sr No">
@@ -174,16 +178,16 @@
           </div>
         </div>
 
-        <div class="section-title" style="margin-top:14px">Consignor / Received By</div>
+        <div class="section-title" style="margin-top:12px;">Consignor / Received By</div>
         <div class="sign-grid">
-          <div class="col">
+          <div>
             <div class="col-title">For Authorised Person</div>
             <label>Name</label><input id="receivedName" placeholder="Name">
             <label>Designation</label><input id="receivedDesg" placeholder="Designation">
             <label>Date</label><input id="receivedDate" type="date">
             <div class="stamp">Stamp &amp; Sign</div>
           </div>
-          <div class="col">
+          <div>
             <div class="col-title">For Security</div>
             <label>Name</label><input id="recSecName" placeholder="Name">
             <label>Register Sr. No.</label><input id="recSecReg" placeholder="Register Sr No">
@@ -191,7 +195,7 @@
             <div class="stamp">Stamp &amp; Sign — Security</div>
           </div>
         </div>
-      </article>
+      </div>
     </section>
   </main>
 
