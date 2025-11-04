@@ -1,89 +1,259 @@
-/* A4 sized single page style (print-friendly) */
-:root{
-  --brand:#0a4b76;
-  --muted:#666;
-  --border:#222;
-  --page-width:21cm;
-  --page-height:29.7cm;
-  --stamp-size:3cm; /* square stamp size */
+@page {
+  size: A4;
+  margin: 10mm 12mm;
 }
 
-*{box-sizing:border-box}
-body{font-family:Inter, Arial, sans-serif;background:#f2f4f7;padding:20px;display:flex;justify-content:center}
-.page-wrap{width:var(--page-width);-webkit-print-color-adjust:exact}
-.gatepass{background:#fff;padding:14mm 12mm;min-height:var(--page-height);position:relative;border:1px #ddd solid;box-shadow:0 6px 20px rgba(0,0,0,0.06)}
-
-.gp-header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);padding-bottom:8px}
-.logo-left img{height:64px}
-.gp-title{text-align:center;flex:1}
-.company{font-weight:800;font-size:16px;color:var(--brand)}
-.place{font-weight:700;margin-top:2px}
-.gp-meta{width:260px;display:flex;flex-direction:column;gap:6px}
-.meta-row label{font-size:12px;color:var(--muted);font-weight:700}
-.meta-box{border:1px solid var(--border);padding:6px;background:#fafafa;font-weight:700}
-
-/* sections */
-.section{margin-top:12px}
-.details{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.details .col{display:flex;flex-direction:column}
-.details label{font-weight:700;font-size:13px}
-.details select,input{padding:6px;border:1px solid #cfd8df;border-radius:4px}
-
-/* items table */
-.items-section .items-header{display:flex;justify-content:space-between;align-items:center}
-.items-table{width:100%;border-collapse:collapse;margin-top:8px}
-.items-table thead th{background:#f7fbff;border:1px solid #c7d7e5;padding:8px;font-weight:700}
-.items-table td{border:1px solid #e2e8ee;padding:6px}
-.item-input{width:100%;padding:6px;border:1px solid #d0d7dd;border-radius:4px}
-.items-actions button{padding:6px 10px}
-button{background:var(--brand);color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
-button.secondary{background:#e9eef5;color:#0a4b76}
-
-/* remarks */
-.remarks textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #d0d7dd}
-
-/* qr & info */
-.qr-row{display:flex;gap:12px;align-items:center;margin-top:6px}
-.qr-box{width:110px;height:110px;border:1px solid #eef5fa;padding:6px;border-radius:6px;background:#fff}
-.small-info{font-size:12px;color:var(--muted)}
-
-/* dotted cut line */
-.cut-line{margin-top:12px;text-align:center;color:var(--muted);border-top:1px dashed #999;padding-top:6px}
-
-/* signature area */
-.sign-row{display:flex;gap:20px;margin-top:12px}
-.sign-col{flex:1;border:1px solid #e6eef5;padding:10px;border-radius:6px}
-.sign-title{font-weight:800;margin-bottom:6px}
-.stamp-box{width:var(--stamp-size);height:var(--stamp-size);border:2px dashed #999;margin-top:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
-.sign-line{margin-top:10px;font-weight:700}
-
-/* actions */
-.actions-row{display:flex;gap:12px;justify-content:flex-end;margin-top:14px}
-
-/* responsive smaller screens */
-@media (max-width:900px){
-  .details{grid-template-columns:repeat(2,1fr)}
-  .gp-meta{width:220px}
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f3f6fa;
+  color: #000;
+  margin: 0;
+  padding: 0;
 }
 
-/* PRINT STYLES - watermark + single page fit */
-@media print{
-  body{background:white}
-  .page-wrap{box-shadow:none}
-  .gatepass{border:none;box-shadow:none;padding:12mm}
-  /* watermark centered only while printing */
-  .gatepass::before{
-    content:"";
-    position:absolute;
-    left:50%;top:40%;
-    transform:translate(-50%,-50%);
-    width:50%;height:50%;
-    background-image:url('https://gwtpl.co/logo.png');
-    background-repeat:no-repeat;background-position:center;background-size:contain;
-    opacity:0.06;z-index:0;
+.container {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  margin: auto;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
+  padding: 10mm;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+}
+
+.header-text {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.header-text h1 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.header-text h2 {
+  font-size: 14px;
+  margin: 2px 0;
+}
+
+.header-text h3 {
+  font-size: 14px;
+  margin: 4px 0 0;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Section Titles */
+section h3 {
+  background: #e6ecf5;
+  padding: 5px;
+  font-size: 13px;
+  border-left: 4px solid #004aad;
+  margin-top: 12px;
+}
+
+/* Common inputs */
+label {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+input, select, textarea {
+  font-size: 12px;
+  padding: 3px 5px;
+  margin: 3px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  width: 100%;
+}
+
+/* Layout groups */
+.gatepass-info, .transfer-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.item-section {
+  margin-top: 15px;
+}
+
+.item-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.item-inputs input[type="text"],
+.item-inputs input[type="number"],
+.item-inputs select {
+  width: auto;
+}
+
+button {
+  background: #004aad;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #003580;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Table */
+#itemTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+#itemTable th, #itemTable td {
+  border: 1px solid #ccc;
+  font-size: 12px;
+  padding: 4px;
+  text-align: center;
+}
+
+.note {
+  font-size: 11px;
+  font-style: italic;
+  color: #333;
+  margin-top: 5px;
+}
+
+/* Signature & Stamp Sections */
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  border: 1px dashed #aaa;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.sign-block {
+  width: 48%;
+}
+
+.sign-block h4 {
+  font-size: 13px;
+  text-decoration: underline;
+  margin-bottom: 5px;
+}
+
+.sign-stamp-box {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.sign-box, .stamp-box {
+  border: 1px solid #000;
+  width: 48%;
+  height: 50px;
+  font-size: 11px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 3px;
+}
+
+.stamp-box {
+  height: 70px;
+}
+
+/* Cut line & copy label */
+.cut-line {
+  border-top: 1px dashed #000;
+  margin: 12px 0 8px;
+  position: relative;
+}
+
+.cut-line::after {
+  content: "Security Copy / Office Copy";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  font-size: 11px;
+  padding: 0 5px;
+  color: #555;
+}
+
+/* Print Watermark */
+@media print {
+  body {
+    background: none;
   }
-  /* ensure only gatepass printed */
-  button, .items-actions, .cut-line, .page-wrap { display: none !important; }
-  /* inputs -> plain text while printing */
-  input, select, textarea{border:none;background:transparent}
+
+  .container {
+    box-shadow: none;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .logo {
+    position: absolute;
+    top: 40%;
+    left: 25%;
+    width: 300px;
+    opacity: 0.07;
+    transform: rotate(-15deg);
+  }
+
+  button, .hidden-in-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+}
+
+/* Authority Section */
+.auth-section {
+  margin-top: 8px;
+}
+
+/* Footer */
+footer {
+  margin-top: 12px;
+  text-align: center;
+}
+
+footer button {
+  margin: 0 10px;
 }
