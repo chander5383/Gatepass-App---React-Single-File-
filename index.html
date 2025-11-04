@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GWTPL Gate Pass (v10.3)</title>
+  <title>GWTPL Gate Pass (v11)</title>
 
   <link rel="stylesheet" href="style.css" />
 
@@ -24,7 +24,7 @@
   </header>
 
   <main class="layout">
-    <!-- History -->
+    <!-- history panel -->
     <aside id="historyPanel" class="history-panel" aria-hidden="true">
       <h3>GatePass History</h3>
       <div class="hist-controls">
@@ -37,20 +37,17 @@
       <div id="historyList" class="history-list"></div>
     </aside>
 
-    <!-- Print area (two copies stack) -->
-    <section class="paper-wrap">
-      <div id="paper" class="paper">
-        <div class="copy" id="copyTop"></div>
-        <div class="copy" id="copyBottom"></div>
-      </div>
+    <!-- MAIN: preview single gatepass page (what user sees) -->
+    <section class="preview-wrap">
+      <div id="previewCopy" class="preview-copy"></div>
     </section>
 
-    <!-- Editor form (grouped sections) -->
+    <!-- Editor form on right/under (grouped sections) -->
     <section class="editor">
-      <!-- Header section -->
+      <!-- header -->
       <article class="box header-box">
         <div class="header-left">
-          <img class="logo" src="https://gwtpl.co/logo.png" alt="logo">
+          <img class="logo" id="logoImg" src="https://gwtpl.co/logo.png" alt="logo">
         </div>
         <div class="header-center">
           <div class="company">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
@@ -72,7 +69,7 @@
         </div>
       </article>
 
-      <!-- Section 1: Consignor / Consignee -->
+      <!-- Section 1 -->
       <article class="box section">
         <div class="section-title">Consignor / Consignee Details</div>
         <div class="grid-3">
@@ -103,7 +100,7 @@
         </div>
       </article>
 
-      <!-- Section 2: Item Details -->
+      <!-- Section 2 -->
       <article class="box section">
         <div class="section-title">Item Details</div>
         <div class="items-head">
@@ -144,7 +141,7 @@
         </table>
       </article>
 
-      <!-- Section 3: Remarks & QR -->
+      <!-- Section 3 -->
       <article class="box section remarks-qr">
         <div class="remarks">
           <div class="section-title">Remarks</div>
@@ -157,7 +154,7 @@
         </div>
       </article>
 
-      <!-- Section 4 & 5: Signatures -->
+      <!-- signatures -->
       <article class="box section signature-area">
         <div class="section-title">Consignee / Issued By</div>
         <div class="sign-grid">
@@ -173,7 +170,7 @@
             <label>Name</label><input id="issueSecName" placeholder="Name">
             <label>Register Sr. No.</label><input id="issueSecReg" placeholder="Register Sr No">
             <label>Date</label><input id="issueSecDate" type="date">
-            <div class="stamp">Stamp (Security)</div>
+            <div class="stamp">Stamp &amp; Sign — Security</div>
           </div>
         </div>
 
@@ -191,7 +188,7 @@
             <label>Name</label><input id="recSecName" placeholder="Name">
             <label>Register Sr. No.</label><input id="recSecReg" placeholder="Register Sr No">
             <label>Date (manual)</label><input id="recSecDate" placeholder="(write manually)">
-            <div class="stamp">Stamp (Security)</div>
+            <div class="stamp">Stamp &amp; Sign — Security</div>
           </div>
         </div>
       </article>
