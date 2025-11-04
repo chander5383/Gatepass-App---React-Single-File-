@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GWTPL Gate Pass (v3 Revised)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sheet" id="sheetRoot">
+    <!-- HEADER -->
+    <div class="gp-header">
+      <img class="logo" src="https://gwtpl.co/logo.png" alt="logo">
+      <div class="gp-title">
+        <div class="company">GLOBUS WAREHOUSING &amp; TRADING PRIVATE LIMITED</div>
+        <div class="place">ABOHAR</div>
+        <div style="margin-top:6px;font-weight:700" id="voucherTitle">STOCK TRANSFER VOUCHER</div>
+      </div>
+      <div class="meta">
+        <div>
+          <label>Gate Pass No</label>
+          <div id="metaGpNo" class="box"></div>
+        </div>
+        <div>
+          <label>Date</label>
+          <input id="metaDate" type="date">
+        </div>
+        <div>
+          <label>Type</label>
+          <select id="metaType" class="print-hidden">
+            <option>STOCK TRANSFER VOUCHER</option>
+            <option>STOCK VOUCHER (RETURNABLE STOCK)</option>
+            <option>RETURN</option>
+            <option>TRANSFER</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSIGNOR DETAILS -->
+    <section class="details">
+      <div>
+        <label>Consignor (Godown)</label>
+        <input id="consignorManual" placeholder="Enter Consignor Name">
+      </div>
+      <div>
+        <label>Consignee Unit</label>
+        <input id="consignee" value="GWTPL Abohar" readonly>
+      </div>
+      <div>
+        <label>Vehicle No</label>
+        <input id="vehicleNo" placeholder="Vehicle No">
+      </div>
+      <div>
+        <label>Person Carrying</label>
+        <input id="personCarrying" placeholder="Name">
+      </div>
+      <div>
+        <label>Authority Person</label>
+        <input id="authorityPerson" placeholder="Authority Person">
+      </div>
+    </section>
+
+    <!-- ITEMS -->
+    <div class="items-head">
+      <h3>Item Details</h3>
+      <div class="items-actions print-hidden">
+        <button id="btnAddRow" type="button">+ Add Item</button>
+        <button id="btnClearRows" type="button" class="secondary">Clear Items</button>
+      </div>
+    </div>
+
+    <table class="items-table" id="itemsTable">
+      <thead>
+        <tr>
+          <th style="width:6%">Sr</th>
+          <th style="width:36%">Item Description</th>
+          <th style="width:12%">Tag No</th>
+          <th style="width:12%">Qty</th>
+          <th style="width:10%">Unit</th>
+          <th style="width:14%">Remarks</th>
+          <th style="width:10%" class="print-hidden">Action</th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" style="text-align:right;font-weight:700">Total Qty</td>
+          <td id="totalQty" style="text-align:center;font-weight:700">0</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- Remarks -->
+    <section class="remarks">
+      <label>Remarks</label>
+      <textarea id="remarks" rows="2" placeholder="Any remarks..."></textarea>
+    </section>
+
+    <!-- QR & generated time -->
+    <div class="qr-row">
+      <div class="qr-box" id="qrBox"></div>
+      <div style="font-size:13px;color:#666">
+        <div>Generated on: <span id="genOn"></span></div>
+        <div style="margin-top:6px">Scan QR for verification</div>
+      </div>
+    </div>
+
+    <div class="cut"></div>
+
+    <!-- Security Signatures -->
+    <div class="sign-row">
+      <div class="sign-block">
+        <h4>ISSUED BY - Security</h4>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Name</label>
+          <input id="issueSecName" style="width:58%;display:inline-block" placeholder="Security Name">
+        </div>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Register Sr No.</label>
+          <input id="issueSecReg" style="width:58%;display:inline-block" placeholder="Sr No">
+        </div>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Outward Register Sr. No.</label>
+          <input id="issueSecOutwardReg" style="width:58%;display:inline-block" placeholder="Register Sr No">
+        </div>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Date</label>
+          <input id="issueSecDate" type="date" style="width:58%;display:inline-block">
+        </div>
+        <div class="stamp-sign">
+          <div class="stamp" id="stampIssueSec">Stamp & Sign</div>
+        </div>
+      </div>
+      <div class="sign-block">
+        <h4>RECEIVED BY - Security</h4>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Name</label>
+          <input id="recSecName" style="width:58%;display:inline-block" placeholder="Security Name">
+        </div>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Register Sr No.</label>
+          <input id="recSecReg" style="width:58%;display:inline-block" placeholder="Sr No">
+        </div>
+        <div class="line">
+          <label style="width:40%;display:inline-block">Date (manual)</label>
+          <input id="recSecDate" type="text" style="width:58%;display:inline-block" placeholder="(write by pen on print)">
+        </div>
+        <div class="stamp-sign">
+          <div class="stamp" id="stampRecSec">Stamp & Sign</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions print-hidden">
+      <button id="saveBtn">Save & New</button>
+      <button id="printBtn">Print</button>
+      <button id="pdfBtn">Download PDF</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
