@@ -308,7 +308,21 @@
 <script>
 /* ========== CONFIG ========== */
 // --- URL IS FILLED IN ---
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqdLZbbv8OUKrrabofOb7ImGUIklDXByK-935W4aRZa9Cr03Z_0sNq8khchuNZNQfKvQ/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_RbGXozw4-NR3TtXN0Jxn4leFJ1vo7pEcin-eFBD5kfVvTI3O4349vXeNzU7T2qXlMw/exec";
+
+  async function saveToServer(payload) {
+    try {
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      console.log("Data sent to Google Apps Script");
+    } catch (err) {
+      console.error("Save failed:", err);
+    }
+  }
 
 /* DOM */
 const gpNoEl = document.getElementById('gpNo');
