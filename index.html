@@ -1,168 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GWTPL Gate Pass (v14.0)</title>
-  <style>
-    :root{
-      --brand:#0a4b76;
-      --muted:#6b7780;
-      --border:#dbe8f2;
-      --bg:#f6f8fa;
-      --card:#fff;
-    }
-    *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;}
-    body{margin:0;padding:20px;background:var(--bg);color:#111;}
-    .container{max-width:1000px;margin:auto;background:var(--card);padding:20px 28px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.08);}
-    header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);padding-bottom:10px;margin-bottom:16px;}
-    .company{font-weight:800;color:var(--brand);text-align:center;flex:1;}
-    .meta{text-align:right;font-size:13px;}
-    .meta input,.meta select{padding:6px;border:1px solid var(--border);border-radius:6px;}
-    h2{margin:6px 0 0;font-size:16px;color:var(--brand);}
-    section{margin-bottom:20px;}
-    label{font-weight:600;font-size:13px;}
-    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);font-size:13px;}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    table{width:100%;border-collapse:collapse;margin-top:8px;}
-    th,td{border:1px solid var(--border);padding:8px;text-align:center;font-size:13px;}
-    th{background:#f3f8fb;color:#0a4b76;font-weight:700;}
-    .controls{margin-bottom:6px;}
-    .controls label{margin-right:12px;font-weight:600;font-size:13px;}
-    .btn{background:var(--brand);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;}
-    .btn:hover{opacity:0.9;}
-    .btn.muted{background:#e6eef5;color:#222;}
-    .remarks{margin-top:10px;}
-    .goods-note{margin-top:8px;padding:8px;border-radius:6px;background:#fff7f7;border:1px solid #ffdede;color:#a50000;font-weight:800;text-align:center;}
-    .sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;}
-    .sign-grid div{border:1px solid var(--border);border-radius:8px;padding:12px;background:#fcfdff;}
-    .stamp{margin-top:12px;padding:18px 8px;border:1px dashed #bbb;text-align:center;font-size:14px;color:#888;border-radius:6px;}
-    @media(max-width:700px){.grid-3,.grid-2{grid-template-columns:1fr;}.sign-grid{grid-template-columns:1fr;}}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GWTPL Gate Pass (v15.5)</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg" width="70" alt="Logo">
-      <div class="company">
-        GLOBUS WAREHOUSING & TRADING PVT LTD<br>
-        <div>ABOHAR</div>
-        <h2>STOCK TRANSFER VOUCHER</h2>
+  <div class="page-wrap">
+    <header class="topbar">
+      <div class="logo-wrap">
+        <img src="https://gwtpl.co/logo.png" alt="GWTPL Logo" id="mainLogo">
       </div>
-      <div class="meta">
-        <div>Gate Pass No</div>
+      <div class="title-wrap">
+        <div class="company">GLOBUS WAREHOUSING & TRADING PRIVATE LIMITED</div>
+        <div class="location">ABOHAR</div>
+        <div class="doc-title" id="docTitle">STOCK TRANSFER VOUCHER</div>
+      </div>
+      <div class="meta-wrap">
+        <label>Gate Pass No</label>
         <input id="gpNo" value="GWPTL/ABOHAR/2025/001" />
-        <div style="margin-top:6px;">Date: <input id="gpDate" type="date"></div>
-        <div style="margin-top:6px;">Type:
-          <select id="gpType">
-            <option>RETURN</option>
-            <option>ISSUE</option>
-          </select>
-        </div>
+        <label style="margin-top:8px">Date</label>
+        <input id="gpDate" type="date" />
+        <label style="margin-top:8px">Type</label>
+        <select id="gpType">
+          <option>Stock Transfer Voucher</option>
+          <option>Stock Transfer Voucher Returnable</option>
+        </select>
       </div>
     </header>
 
-    <section>
-      <h3>Consignor / Consignee Details</h3>
-      <div class="grid-3">
-        <div><label>Consignor (Godown)</label><input id="consignor" placeholder="Enter godown name (manual)"></div>
-        <div><label>Consignee Unit</label><input id="consignee" value="GWPTL Abohar"></div>
-        <div><label>Vehicle No</label><input id="vehicle"></div>
-      </div>
-      <div class="grid-2" style="margin-top:12px;">
-        <div><label>Person Carrying</label><input id="person"></div>
-        <div><label>Authority Person</label><input id="authority" value="Sh."></div>
-      </div>
-    </section>
+    <main class="content">
+      <!-- CONSIGNOR/CONSIGNEE -->
+      <section class="card grid-3">
+        <div>
+          <label>Consignor (Godown)</label>
+          <input id="consignor" placeholder="Enter godown name (manual)">
+        </div>
+        <div>
+          <label>Consignee Unit</label>
+          <input id="consignee" value="GWPTL Abohar">
+        </div>
+        <div>
+          <label>Vehicle No</label>
+          <input id="vehicle" placeholder="Vehicle No">
+        </div>
 
-    <section>
-      <h3>Item Details</h3>
-      <div class="controls">
-        <label><input type="checkbox" id="showTag" onchange="toggleCols()"> Tag No</label>
-        <label><input type="checkbox" id="showSr" onchange="toggleCols()"> Sr No</label>
-        <button class="btn" onclick="addRow()">+ Add Item</button>
-      </div>
-      <table id="itemTable">
-        <thead>
-          <tr>
-            <th>Sr</th>
-            <th>Item Description</th>
-            <th class="col-tag">Tag No</th>
-            <th class="col-sr">Sr No</th>
-            <th>Qty</th>
-            <th>Unit</th>
-            <th>Remarks</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-        <tfoot>
-          <tr><td colspan="4" style="text-align:right;font-weight:700;">Total Qty</td><td id="totalQty">0</td><td colspan="3"></td></tr>
-        </tfoot>
-      </table>
-    </section>
+        <div>
+          <label>Person Carrying</label>
+          <input id="person" placeholder="Name">
+        </div>
+        <div>
+          <label>Authority Person</label>
+          <input id="authority" value="Sh.">
+        </div>
+        <div>
+          <label>Consignor/Received By - Date (manual)</label>
+          <input id="consignDate" type="date" />
+        </div>
+      </section>
 
-    <section class="remarks">
-      <label>Remarks</label>
-      <textarea id="remarks" rows="3" placeholder="Any remarks..."></textarea>
-      <div class="goods-note">Goods are not for sale — only site to site transfer</div>
-    </section>
+      <!-- ITEM DETAILS -->
+      <section class="card">
+        <div class="section-header">
+          <h3>Item Details</h3>
+          <div class="controls">
+            <!-- Tag/Sr above action buttons (space efficient) -->
+            <label><input type="checkbox" id="showTag" onchange="toggleCols()"> Tag No</label>
+            <label><input type="checkbox" id="showSr" onchange="toggleCols()"> Sr No</label>
+            <button class="btn" onclick="addRow()">+ Add Item</button>
+            <button class="btn muted" onclick="clearItems()">Clear Items</button>
+          </div>
+        </div>
 
-    <section class="sign-grid">
-      <div>
-        <label>Issued By</label>
-        <input placeholder="Name"><label>Designation</label>
-        <input placeholder="Designation">
-      </div>
-      <div>
-        <label>Received By</label>
-        <input placeholder="Name"><label>Designation</label>
-        <input placeholder="Designation">
-      </div>
-    </section>
+        <div class="table-wrap">
+          <table id="itemTable">
+            <thead>
+              <tr>
+                <th>Sr</th>
+                <th>Item Description</th>
+                <th class="col-tag">Tag No</th>
+                <th class="col-sr">Sr No</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Remarks</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-right strong">Total Qty</td>
+                <td id="totalQty">0</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
-    <div class="stamp">STAMP / SIGNATURE</div>
+        <div id="unitSubtotal" class="unit-subtotals" aria-live="polite"></div>
+      </section>
+
+      <!-- REMARKS AND NOTE -->
+      <section class="card">
+        <label>Remarks</label>
+        <textarea id="remarks" rows="3" placeholder="Any remarks..."></textarea>
+        <div class="goods-note">Goods are not for sale — only site to site transfer</div>
+      </section>
+
+      <!-- ISSUED / RECEIVED grouped layout -->
+      <section class="card group-grid">
+        <div class="group">
+          <h4>Consignee / Issued by</h4>
+          <div class="subgrid">
+            <div>
+              <label>For Security — Date</label>
+              <input id="issuedSecurityDate" type="date">
+              <label>Outward Register Sr No</label>
+              <input id="outwardSr">
+            </div>
+            <div>
+              <label>For Authorised Person — Name</label>
+              <input id="issuedName">
+              <label>Designation</label>
+              <input id="issuedDesig">
+            </div>
+          </div>
+          <div class="sign-row">
+            <div class="sign-box">
+              <img src="https://gwtpl.co/logo.png" alt="stamp" />
+              <div class="sign-label">Stamp and sign</div>
+            </div>
+            <div class="sign-box">
+              <img src="https://gwtpl.co/logo.png" alt="stamp" />
+              <div class="sign-label">Stamp and sign</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <h4>Consignor / Received by</h4>
+          <div class="subgrid">
+            <div>
+              <label>For Security — Date</label>
+              <input id="receivedSecurityDate" type="date">
+              <label>Inward Register Sr No</label>
+              <input id="inwardSr">
+            </div>
+            <div>
+              <label>For Authorised Person — Name</label>
+              <input id="receivedName">
+              <label>Designation</label>
+              <input id="receivedDesig">
+            </div>
+          </div>
+          <div class="sign-row">
+            <div class="sign-box">
+              <img src="https://gwtpl.co/logo.png" alt="stamp" />
+              <div class="sign-label">Stamp and sign</div>
+            </div>
+            <div class="sign-box">
+              <img src="https://gwtpl.co/logo.png" alt="stamp" />
+              <div class="sign-label">Stamp and sign</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACTIONS & DIAGNOSTICS -->
+      <section class="card actions-row">
+        <div class="left">
+          <button class="btn" onclick="saveToSheet()">Save to Google Sheet</button>
+          <button class="btn muted" onclick="downloadJSON()">Download JSON</button>
+          <button class="btn muted" onclick="window.print()">Print (A4)</button>
+        </div>
+        <div class="right diagnostics">
+          <div id="lastStatus">Last save: —</div>
+          <div id="errorLog" class="error-log" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <small>Generated by GWTPL GatePass v15.5</small>
+    </footer>
   </div>
 
-  <script>
-    let rowCount=0;
-    function addRow(){
-      const tb=document.getElementById('tbody');
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${++rowCount}</td>
-        <td><input placeholder="Item description"></td>
-        <td class="col-tag"><input placeholder="Tag No"></td>
-        <td class="col-sr"><input placeholder="Sr No"></td>
-        <td><input type="number" min="0" value="0" onchange="calcTotal()"></td>
-        <td><select><option>Nos</option><option>Kg</option><option>Ltr</option></select></td>
-        <td><input placeholder="Remarks"></td>
-        <td><button class="btn muted" onclick="removeRow(this)">Remove</button></td>`;
-      tb.appendChild(tr);
-      toggleCols();
-      calcTotal();
-    }
-    function removeRow(btn){
-      btn.closest('tr').remove();
-      calcTotal();
-    }
-    function toggleCols(){
-      const tag=document.getElementById('showTag').checked;
-      const sr=document.getElementById('showSr').checked;
-      document.querySelectorAll('.col-tag').forEach(c=>c.style.display=tag?'':'none');
-      document.querySelectorAll('.col-sr').forEach(c=>c.style.display=sr?'':'none');
-    }
-    function calcTotal(){
-      let t=0;
-      document.querySelectorAll('#tbody tr').forEach(tr=>{
-        const val=parseFloat(tr.querySelector('td:nth-child(5) input').value)||0;
-        t+=val;
-      });
-      document.getElementById('totalQty').textContent=t;
-    }
-    // add default row
-    addRow();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
