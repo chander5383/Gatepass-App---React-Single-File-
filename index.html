@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>GWTPL Gate Pass — Final (v2)</title>
 
-<!-- QRCode.js -->
+<!-- QRCode.js and html2pdf (for PDF download) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- html2pdf script removed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
 <style>
   :root{
@@ -57,6 +57,7 @@
   /* header */
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;z-index:2}
   .logo img{height:70px;width:70px;object-fit:contain;display:block}
+  /* --- CHANGED --- Center align 'Abohar' */
   .center-title{flex:1;text-align:center;margin:0 8px}
   .center-title h1{margin:0;font-size:20px;letter-spacing:.3px;font-weight:800}
   /* --- CHANGED --- Abohar bold/bigger */
@@ -180,9 +181,7 @@
 
 <div class="topbar">
   <button class="btn" id="savePrint">Save & Print</button>
-  <!-- --- REMOVED --- PDF Button
-  <button class="btn secondary" id="downloadPdf">Download PDF</button> 
-  -->
+  <button class="btn secondary" id="downloadPdf">Download PDF</button>
   <button class="btn secondary" id="resetBtn">Reset</button>
 
   <div style="display:flex;gap:8px;align-items:center;margin-left:10px">
@@ -309,7 +308,7 @@
 <script>
 /* ========== CONFIG ========== */
 // --- URL IS FILLED IN ---
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEzpyJN2TEtSDj9Q2BPpqMuKMLYMAX64V_dwPY5gYv36RxqW8tp6TctODqnrhgKhIILg/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7PjhCiXByxDby2OEEEFC8WErXlng2IgiWjV9hOfvi_227qttHWDjfYnCwI6FvstdK/exec";
 
 /* DOM */
 const gpNoEl = document.getElementById('gpNo');
@@ -322,7 +321,7 @@ const toggleSr = document.getElementById('toggleSr');
 const toggleRemarks = document.getElementById('toggleRemarks');
 const addItemBtn = document.getElementById('addItem');
 const savePrintBtn = document.getElementById('savePrint');
-// --- REMOVED --- PDF Button const
+const downloadPdfBtn = document.getElementById('downloadPdf');
 const fetchDuplicateBtn = document.getElementById('fetchDuplicate');
 const duplicateInput = document.getElementById('duplicateGPNo');
 const printedInfoEl = document.getElementById('printedInfo');
@@ -615,31 +614,32 @@ function makePrintableHTML(labelSuffix='', copyLabel='OFFICE COPY'){
       print-color-adjust: exact;
     }`;
 
-  // --- CHANGED --- Reverted to original, larger print CSS
+  // --- CHANGED --- Compact 1-Page Print CSS
   const PRINT_CSS = `
     :root{--border:#cfcfcf;--muted:#6b7280;--accent:#0b5394}
     body{font-family:Inter,Arial,Helvetica;margin:0;color:#06203a}
     @page{size:A4;margin:10mm}
-    .paper{width:210mm;box-sizing:border-box;padding:12mm;position:relative; border: 2px solid #000;}
-    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6mm}
+    .paper{width:210mm;box-sizing:border-box;padding:10mm;position:relative; border: 2px solid #000;}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4mm}
     .logo img{height:70px;width:70px}
     .title{flex:1;text-align:center;margin:0 8px}
     .title h1{margin:0;font-size:20px;font-weight:800}
     .title p{margin:0;font-size:16px;font-weight:800;color:#6b7280}
     .qr{width:70px;height:70px;text-align:center}
     .qr img{width:70px;height:70px;}
-    table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6mm}
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4mm}
     table thead th{border-bottom:1px solid #ddd;padding:6px;text-align:left;background:#fafafa}
-    table td{padding:6px;border-bottom:1px solid #f3f3f3;vertical-align:top}
-    .sig-outer{border:2px solid #d1d5db;border-radius:6px;padding:12px;margin-top:8mm}
-    .sig-row{display:flex;gap:12px;flex-wrap:wrap}
-    .sig-block{flex:1;border:1px solid #d8dee4;border-radius:6px;padding:12px;min-height:150px;display:flex;flex-direction:column;gap:10px}
-    .stamp-area{margin-top:8px;border-top:1.5px dashed #cfd8e3;padding-top:12px;height:80px;display:flex;align-items:center;justify-content:center;font-weight:700;background:transparent}
-    .footer{margin-top:8mm;text-align:right;font-size:12px;color:#333}
+    table td{padding:3px 6px;border-bottom:1px solid #f3f3f3;vertical-align:top}
+    /* --- CHANGED --- More compact print */
+    .sig-outer{border:2px solid #d1d5db;border-radius:6px;padding:8px;margin-top:3mm}
+    .sig-row{display:flex;gap:8px;flex-wrap:wrap}
+    .sig-block{flex:1;border:1px solid #d8dee4;border-radius:6px;padding:6px;min-height:100px;display:flex;flex-direction:column;gap:4px}
+    .stamp-area{margin-top:4px;border-top:1.5px dashed #cfd8e3;padding-top:6px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:700;background:transparent}
+    .footer{margin-top:4mm;text-align:right;font-size:12px;color:#333}
     .copy-label{position:absolute;left:50%;transform:translateX(-50%);top:8mm;font-weight:900;opacity:1;font-size:14px;text-decoration:underline;letter-spacing:1px}
     .copy-sub{display:block;font-size:12px;margin-top:2px;opacity:0.9}
     ${watermarkCSS} 
-    .note{margin-top:8px;font-weight:700;color:#b91c1c}
+    .note{margin-top:4px;font-weight:700;color:#b91c1c}
   `;
 
   const authPrint = auth ? ((/^mr\.?\s/i.test(auth)) ? normalizeText(auth) : 'Mr. ' + normalizeText(auth)) : '';
@@ -800,7 +800,48 @@ function generateLocalGP(){
   return `GWTPL/ABO/${data.year}/${pad(data.counter,4)}`;
 }
 
-/* --- REMOVED --- PDF Button Click Event */
+/* --- CHANGED --- PDF Download Fix */
+downloadPdfBtn.onclick = async ()=>{
+  const gpNo = gpNoEl.textContent || generateLocalGP();
+  const filename = gpNo.replace(/\//g,'-') + '.pdf';
+  showToast('Generating PDF...');
+  
+  // Ensure QR is updated
+  const qrDetails = `GP No: ${gpNo}\nDate: ${gpDateEl.value}\nConsignor: ${document.getElementById('consignor').value}\nConsignee: ${document.getElementById('consignee').value}\nVehicle: ${document.getElementById('vehicleNo').value}\nPerson: ${document.getElementById('personCarrying').value}\nAuth: ${document.getElementById('authPerson').value}`;
+  await generateQR(qrDetails); // Wait for QR
+  
+  // Create HTML for PDF
+  const finalHTML = makePrintableHTML('','OFFICE COPY'); 
+  
+  // Create a temporary element to hold the HTML
+  const container = document.createElement('div');
+  container.innerHTML = finalHTML;
+  
+  // --- PDF FIX ---
+  // Hide watermark for PDF generation, as html2pdf struggles with it
+  const watermarks = container.querySelectorAll('.watermark');
+  watermarks.forEach(wm => wm.style.display = 'none');
+  
+  // Force a small delay to ensure images (like QR) are rendered
+  await new Promise(r => setTimeout(r, 100));
+
+  // html2pdf options
+  const opt = {
+    margin: [10,10,10,10], 
+    filename: filename, 
+    image: {type:'jpeg', quality:0.98},
+    html2canvas: {scale: 2, useCORS: true, logging:false },
+    jsPDF: {unit:'mm', format:'a4', orientation:'portrait'}
+  };
+  
+  // Generate PDF from the *element container*
+  html2pdf().from(container).set(opt).save().then(()=>{
+    showToast('PDF saved: ' + filename, 2200);
+  }).catch(err=>{
+    console.error(err);
+    showToast('PDF generation failed');
+  });
+};
 
 
 /* keyboard shortcuts */
