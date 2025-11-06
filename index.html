@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>GWTPL Gate Pass — Final v3</title>
 
-<!-- QRCode.js and html2pdf (for PDF download) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
@@ -265,28 +264,11 @@
 
 <script>
 /* ========== CONFIG ========== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtffi4kO9c8_UO5g0xWc291DR7i6HbKKC-M08KA3BtLdIAEa6m-f8CHkEtcYnXdvYGWQ/exec";
+// ✅ APNA NAYA URL YAHAN PASTE KAREIN
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvZfGcEC00nEu_fHxMOPWyy_NMsVtYo__YSKZ6P66pfqbKXUlf9xjMK1LKMX3VqYslJA/exec";
 //https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?pli=1&gid=0#gid=0
-/* ========== SAVE FUNCTION ========== */
-async function saveToServer(payload) {
-  try {
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors", // ✅ इसको change मत करना
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    console.log("✅ Data sent to Google Apps Script");
-    return { success: true };
-  } catch (err) {
-    console.error("❌ Save failed:", err);
-    return { success: false, error: err.message };
-  }
-}
 
-
-
-/* DOM */
+/* ========== DOM ========== */
 const gpNoEl = document.getElementById('gpNo');
 const qrcodeEl = document.getElementById('qrcode');
 const previewCopyBadge = document.getElementById('previewCopyBadge');
@@ -481,6 +463,11 @@ fetchDuplicateBtn.onclick = async ()=>{
     document.getElementById('vehicleNo').value = json.vehicle_no || '';
     document.getElementById('authPerson').value = json.authorised_person || '';
     document.getElementById('remarks').value = json.remarks || '';
+    
+    // ✅ DUPLICATE FETCH FIX
+    document.getElementById('authName1').value = json.authName1 || '';
+    document.getElementById('authDesig1').value = json.authDesig1 || '';
+
     try{ items = JSON.parse(json.items||'[]'); } catch(e){ items = []; }
 
     enableTag = items.some(it=>it.tag && it.tag.length>0);
@@ -507,7 +494,7 @@ async function saveToServer(payload){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload),
-      mode:'cors'
+      mode:'cors' // ✅ 'cors' mode hi CORS error trigger karta hai
     });
     if(!res.ok) throw new Error(`Network error: ${res.status} ${res.statusText}`);
     
@@ -702,6 +689,7 @@ function makePrintableHTML(labelSuffix='', copyLabel='OFFICE COPY'){
 savePrintBtn.onclick = async ()=>{
   if(!gpDateEl.value){ alert('Please select Date'); gpDateEl.focus(); return; }
 
+  // ✅ PAYLOAD KO AAPKE SHEET KE HISAB SE UPDATE KIYA GAYA HAI
   const payload = {
     gate_pass_no: '', // Server will generate this
     date: gpDateEl.value,
@@ -711,19 +699,22 @@ savePrintBtn.onclick = async ()=>{
     auth_person: normalizeText(document.getElementById('authPerson').value||''),
     type: document.getElementById('gpType').value,
     items: items.filter(it => it.desc || it.qty), 
+    authName1: normalizeText(document.getElementById('authName1').value||''),
+    authDesig1: normalizeText(document.getElementById('authDesig1').value||''),
     remarks: document.getElementById('remarks').value||''
   };
 
   savePrintBtn.disabled = true; savePrintBtn.textContent = 'Saving...';
   showToast('Saving...');
 
-  // Use no-cors saveToServer to support GitHub Pages HTMLService bridge
+  // Yahi function CORS error de raha hai
   const res = await saveToServer(payload);
   
   if(res && res.success && res.gate_pass_no){
     gpNoEl.textContent = res.gate_pass_no;
     showToast('Saved: ' + res.gate_pass_no);
   } else {
+    // Agar save fail hota hai, toh local GP banayega
     gpNoEl.textContent = generateLocalGP(); 
     alert(`Save Error: ${res.error || 'Unknown error'}. \n\nIMPORTANT: Check Sheet Name ('GatePassLog') OR Re-Deploy Script (Deploy > Manage Deployments > Edit > Deploy).`);
   }
