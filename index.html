@@ -265,24 +265,25 @@
 
 <script>
 /* ========== CONFIG ========== */
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwRHs5rQ4Adzf0uT484TLPg8lToVYy03eB5CBYWSnHf3vAQf0WxFPmqzi1GpQiexIfNMw/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3_gOycKnbc07k2PSzGN6EBpzmi6re5wmeb_i2wzjSTOU4sHcrNhYMs5CRTdAAXqU0/exec";
 //https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?pli=1&gid=0#gid=0
 /* ========== SAVE FUNCTION ========== */
 async function saveToServer(payload) {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors",
+      mode: "no-cors", // ✅ इसको change मत करना
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("✅ Data sent to Google Sheet (no-cors)");
+    console.log("✅ Data sent to Google Apps Script");
     return { success: true };
   } catch (err) {
     console.error("❌ Save failed:", err);
     return { success: false, error: err.message };
   }
 }
+
 
 
 /* DOM */
