@@ -272,17 +272,18 @@ async function saveToServer(payload) {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors", // HTMLService bridge handle करेगा
+      mode: "no-cors", // 👈 this allows GitHub Pages to send data without CORS block
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("✅ Data sent to Google Apps Script");
-    return { success:true };
+    console.log("✅ Data sent to Google Apps Script (no-cors)");
+    return { success: true }; // assume success
   } catch (err) {
     console.error("❌ Save failed:", err);
-    return { success:false, error:err.message };
+    return { success: false, error: err.message };
   }
 }
+
 
 /* DOM */
 const gpNoEl = document.getElementById('gpNo');
