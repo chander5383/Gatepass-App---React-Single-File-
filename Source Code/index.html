@@ -1,0 +1,1122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GWTPL Gate Pass — Final v3</title>
+
+<!-- QRCode.js and html2pdf (for PDF download) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<style>
+  :root{
+    --border:#cfcfcf;
+    --muted:#6b7280;
+    --bg:#f7fbff;
+    --accent:#0b5394;
+    --paper-w:210mm;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    background:var(--bg);
+    color:#06203a;
+    padding:18px;
+  }
+  .topbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .btn{background:linear-gradient(180deg,#0f6fb4,var(--accent));color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700;transition:all .18s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(11,83,148,.18)}
+  .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(11,83,148,.12);box-shadow:none}
+  .hint{margin-left:auto;color:var(--muted);font-size:13px}
+  .small{padding:8px 10px;border-radius:6px;font-weight:700}
+  .preview-wrap{display:flex;justify-content:center}
+  .paper{
+    width:calc(var(--paper-w));
+    max-width:100%;
+    background:#fff;
+    padding:18mm;
+    border-radius:6px;
+    border:1px solid var(--border);
+    box-shadow:0 18px 48px rgba(2,6,23,.06);
+    position:relative;
+    overflow:visible;
+  }
+  .outer-border{position:absolute;inset:6mm;border:1px solid rgba(0,0,0,.04);pointer-events:none;border-radius:4px}
+  .watermark{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);opacity:.04;width:62%;pointer-events:none;z-index:0}
+  .watermark img{width:100%;height:auto;display:block}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;z-index:2}
+  .logo img{height:70px;width:70px;object-fit:contain;display:block}
+  .center-title{flex:1;text-align:center;margin:0 8px}
+  .center-title h1{margin:0;font-size:20px;letter-spacing:.3px;font-weight:800}
+  .center-title p{margin:0;color:var(--muted);font-size:16px;font-weight:800}
+  
+  /* ✅ QR CODE FIX: Size badha di gayi hai */
+  .qr-box{
+    width:80px; /* Was 85px */
+    height:80px; /* Was 85px */
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #eef2ff;
+    background:#fff;
+    position:relative;
+    padding: 5px; /* Thodi padding di gayi hai */
+  }
+  .qr-box img, .qr-box canvas {
+    /* Removed width/height 100% to respect library's settings */
+  }
+
+  /* === HOME PAGE LABEL FIX === */
+  /* Home page par label ko hide kar diya hai */
+  .copy-badge{
+    display: none; 
+    position:absolute;right:0;top:-24px;font-weight:800;color:#000;opacity:.9;font-size:13px;text-align:center;width:120px
+  }
+  .copy-badge .label-text{display:block;text-decoration:none;} /* Underline hata di gayi */
+  
+  .center-info{display:flex;align-items:center;justify-content:flex-start;gap:14px;margin:12px 0 10px;flex-wrap:wrap;z-index:2}
+  .info-card{border:0;padding:4px 12px;border-radius:8px;min-width:180px;text-align:left;background:#fff}
+  .info-card .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+  .info-card .value{font-weight:700}
+  .form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px;z-index:2}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+  .field input[type="text"], .field input[type="date"], .field select, textarea{
+    width:100%;padding:8px;border-radius:6px;border:1px solid #e6eef8;font-size:14px;background:#fff;
+    font-family:inherit;box-sizing:border-box;
+  }
+  .field input[readonly]{background:#f9fafb;color:#111}
+  textarea{resize:none;overflow:hidden;line-height:1.35;min-height:38px}
+  .toggles{display:flex;gap:12px;align-items:center;margin-top:12px;z-index:2}
+  .items-wrap{margin-top:12px;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#fff;z-index:2}
+  .items{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+  .items thead th{background:#fafafa;padding:8px;border-bottom:1px solid var(--border);text-align:left}
+  .items td{padding:8px;border-bottom:1px solid #f1f3f5;vertical-align:top}
+  .items td input, .items td select, .items td textarea{width:100%;border:0;background:transparent;padding:6px;font-size:13px}
+  .items td input[type="number"]{-moz-appearance:textfield}
+  .col-sr{width:5%}
+  .col-desc{width:45%}
+  .col-qty{width:10%}
+  .col-unit{width:10%}
+  .col-tag{width:12%}
+  .col-srno{width:12%}
+  .col-remark{width:18%}
+  .items-wrap .scroll{overflow:auto;max-height:220px}
+  .actions-row{display:flex;gap:10px;align-items:center;padding:10px}
+  .btn.add{background:transparent;border:1px dashed #cfe6ff;color:var(--accent);padding:8px 10px;border-radius:8px}
+  .sig-outer{border:2px solid #d1d5db;border-radius:8px;padding:12px;margin-top:14px;background:#fff;z-index:2}
+  .sig-row{display:flex;gap:8px;flex-wrap:wrap}
+  .sig-block{flex:1;border:1px solid #d8dee4;border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px;background:#fff;min-width:220px;min-height:170px}
+  .sig-block .label{font-size:13px;color:var(--muted);font-weight:700}
+  .sig-row .row-input{display:flex;gap:6px;align-items:center;justify-content:flex-start}
+  .sig-row input{border:1px dashed #cfd8e3;padding:6px;border-radius:6px;background:transparent;font-size:13px;min-width:120px}
+  .sig-row .small-input{min-width:80px;padding:6px}
+  .sig-row .spacer{flex:1}
+  
+  /* === STAMP & SIGN FIX (PREVIEW) === */
+  .stamp-area{
+    margin-top:6px;
+    border-top:1.5px dashed #cfd8e3;
+    padding-top:10px;
+    height:72px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ccc; /* Changed to light grey */
+    background:transparent; /* Removed background */
+  }
+  .stamp-area.preview-blur{
+    filter: none; /* Removed blur */
+    opacity: 1; /* Removed opacity */
+  }
+  /* === END STAMP FIX === */
+
+  .remarks{margin-top:12px;z-index:2}
+  .remarks textarea{width:100%;padding:10px;border-radius:6px;border:1px solid #e6eef8;white-space:nowrap;overflow-x:auto;font-size:14px;min-height:44px}
+  .printed-info{margin-top:10px;text-align:right;color:var(--muted);font-size:12px;z-index:2}
+  .toast{position:fixed;right:20px;bottom:20px;background:#052e5d;color:#fff;padding:12px 16px;border-radius:8px;box-shadow:0 8px 24px rgba(2,6,23,.2);opacity:0;transform:translateY(10px);transition:all .28s}
+  .toast.show{opacity:1;transform:translateY(0)}
+  
+  @media print{
+    @page{size:A4;margin:10mm}
+    body{background:transparent;padding:0}
+    .topbar{display:none}
+    
+    /* === BORDER/OUTLINE FIX (PRINT) === */
+    /* ✅ REVISION: Border mota kar diya hai (2px se 3px) */
+    .paper{
+        padding:10mm;
+        overflow:visible;
+        /* min-height:277mm; <-- YEH HATA DIYA HAI */ 
+        border: none !important; /* Border hata diya */
+        /* === FIX: Replaced box-shadow with outline to prevent cutoff === */
+        outline: 3px solid #000 !important; /* Outline (border) laga diya */
+        outline-offset: -3px !important; /* Border ko page ke andar kar diya */
+        box-shadow: none !important; /* Shadow hata diya */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .items-wrap .scroll{max-height:none;overflow:visible}
+    .sig-outer{page-break-inside:avoid}
+    .watermark{
+      opacity:.06 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    textarea{height:auto !important;overflow:visible !important}
+    
+    /* === LABEL FIX (PRINT) === */
+    .copy-label{
+        position:absolute;
+        left:50%;
+        transform:translateX(-50%);
+        top:8mm; /* Original position */
+        font-weight:900;
+        opacity:1;
+        font-size:14px;
+        text-decoration:none; /* Underline hata di gayi */
+        letter-spacing:1px
+    }
+    
+    .header{margin-bottom: 4mm;}
+    .center-title{text-align: center;}
+    .title p{font-size:16px;font-weight:800}
+    table{margin-top: 4mm;}
+    table td, table th {padding: 3px 6px;}
+    .note{margin-top: 4px;}
+    
+    /* === STAMP & SIGN FIX (PRINT) === */
+    .stamp-area{
+        background:transparent;
+        filter:none;
+        opacity:1; 
+        height: 40px !important; 
+        padding-top: 6px !important; 
+        margin-top: 4px !important;
+        color: #ccc; /* Show faint text */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .sig-block{min-height:100px; padding: 6px; gap:4px}
+    .sig-outer{margin-top: 3mm !important; padding: 8px;}
+    
+    /* ✅ FIX: Footer ko border se baahar nikaal diya */
+    .footer{
+      margin-top: 4mm;
+      position: fixed;
+      bottom: 10mm;
+      right: 10mm;
+      color: #333;
+    }
+    
+    /* ✅ FIX: Page wrapper taaki footer sahi se position ho sake */
+    .print-page-wrapper {
+        position: relative;
+        min-height: 277mm; /* Full A4 height minus margins */
+        page-break-after: always;
+    }
+    .print-page-wrapper:last-child {
+        page-break-after: avoid;
+    }
+
+  }
+  @media (max-width:920px){
+    .topbar{flex-direction: column; align-items: stretch; gap: 8px;}
+    .hint{margin-left: 0;}
+    .center-info{flex-direction: column; align-items: stretch; gap: 8px;}
+    .info-card{min-width: 100%;}
+    .form-grid{grid-template-columns:1fr}
+    .sig-row{flex-direction:column}
+    header{flex-direction:column;gap:6px;align-items:center}
+    .sig-row input{min-width:100%}
+    .sig-block{min-width:100%}
+    .copy-badge{position:static;margin-top:6px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="btn" id="savePrint">Save & Print</button>
+  <button class="btn secondary" id="downloadPdf">Download PDF</button>
+  <button class="btn secondary" id="resetBtn">Reset</button>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-left:10px">
+    <input id="duplicateGPNo" placeholder="Old GP no to duplicate" style="padding:8px;border-radius:6px;border:1px solid var(--border)">
+    <button class="small" id="fetchDuplicate">Duplicate Print</button>
+  </div>
+
+  <div class="hint">Hosted on Google Sheets!</div>
+  
+</div>
+
+<div class="preview-wrap">
+  <article class="paper" id="paper" role="document" aria-label="Gate Pass preview">
+    <div class="outer-border"></div>
+    <div class="watermark" aria-hidden="true"><img src="https://gwtpl.co/logo.png" alt="wm"></div>
+
+    <header>
+      <div class="logo"><img src="https://gwtpl.co/logo.png" alt="logo"></div>
+      <div class="center-title">
+        <h1>Globus Warehousing and Trading Pvt. Ltd.</h1>
+        <p id="aboTitle">Abohar</p>
+      </div>
+      <!-- === QR/LABEL FIX (PREVIEW) === -->
+      <div class="qr-box" id="qrcode">
+        <!-- Badge ab CSS se hidden hai -->
+        <div class="copy-badge" id="previewCopyBadge"><span class="label-text"></span></div>
+      </div>
+    </header>
+
+    <div class="center-info">
+      <!-- ✅ Naya GP number yahaan load hoga -->
+      <div class="info-card"><div class="label">Gate Pass No.</div><div class="value" id="gpNo">Loading...</div></div>
+      <div class="info-card"><div class="label">Type</div><div>
+        <select id="gpType" style="border:none;background:transparent;font-weight:700">
+          <option selected>Stock Transfer Voucher</option>
+          <option>Stock Transfer Returnable</option>
+          <option>Transfer</option>
+        </select>
+      </div></div>
+      <div class="info-card"><div class="label">Date</div><div><input type="date" id="gpDate" style="border:none;background:transparent;font-weight:700" max=""></div></div>
+    </div>
+
+    <!-- 
+      ===============================================================
+      ✅ **BADLAV 1: HTML Layout Update**
+      - Authority Person ab pehli row mein hai.
+      - Person Carrying, Vehicle No., aur naya Mobile No. field doosri row mein hain.
+      ===============================================================
+    -->
+    <section class="form-grid">
+      <div class="field"><label>Consignee Unit</label><input type="text" id="consignee" value="GWTPL Abohar" readonly></div>
+      <div class="field"><label>Consignor Unit</label><input type="text" id="consignor" placeholder="e.g. Muktsar-2"></div>
+      <div class="field"><label>Authority Person</label><input type="text" id="authPerson" placeholder="Name"></div>
+      <div class="field"><label>Person Carrying</label><input type="text" id="personCarrying" placeholder="Name"></div>
+      <div class="field"><label>Vehicle No.</label><input type="text" id="vehicleNo" placeholder="Vehicle No"></div>
+      <div class="field"><label>Person Carrying Mobile No.</label><input type="text" id="personMobile" placeholder="10 Digit Mobile" maxlength="10"></div>
+    </section>
+
+    <div class="toggles">
+      <label><input type="checkbox" id="toggleTag"> Enable Tag No</label>
+      <label><input type="checkbox" id="toggleSr"> Enable SR No</label>
+      <label><input type="checkbox" id="toggleRemarks"> Enable Remarks</label>
+      <div style="margin-left:auto;color:var(--muted)" id="subTotals">Subtotal: -</div>
+    </div>
+
+    <div class="items-wrap">
+      <div class="scroll">
+        <table class="items" id="itemsTable" role="table" aria-label="Item details">
+          <thead id="itemsHead"></thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn add" id="addItem">+ Add Item (Ctrl+Enter)</button>
+        <div style="margin-left:auto;color:var(--muted);font-weight:700" id="unitTotals">Unit totals: -</div>
+      </div>
+    </div>
+
+    <div class="sig-outer">
+      <strong>Consignee / Issued By</strong>
+      <div class="sig-row" style="margin-top:8px">
+        <div class="sig-block">
+          <div class="label">For Security</div>
+          <div class="row-input"><div style="min-width:140px">Outward Reg. Sr No:</div><input type="text" id="outward1" placeholder=""></div>
+          <div class="row-input"><div style="min-width:140px">Date:</div><input type="date" id="secDate1" class="small-input"></div>
+          <div style="height:6px"></div>
+          <div class="stamp-area preview-blur">Stamp &amp; Sign</div>
+        </div>
+
+        <div class="sig-block">
+          <div class="label">For Authorised Person</div>
+          <div class="row-input"><div style="min-width:80px">Name:</div><input type="text" id="authName1" placeholder=""></div>
+          <div class="row-input"><div style="min-width:80px">Designation:</div><input type="text" id="authDesig1" placeholder=""></div>
+          <div style="height:6px"></div>
+          <div class="stamp-area preview-blur">Stamp &amp; Sign</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-outer">
+      <strong>Consignor Unit / Received By</strong>
+      <div class="sig-row" style="margin-top:8px">
+        <div class="sig-block">
+          <div class="label">For Security</div>
+          <div class="row-input"><div style="min-width:140px">Inward Reg. Sr No:</div><input type="text" id="inward2" placeholder=""></div>
+          <div class="row-input"><div style="min-width:140px">Date:</div></div>
+          <div style="height:6px"></div>
+          <div class="stamp-area preview-blur">Stamp &amp; Sign</div>
+        </div>
+
+        <div class="sig-block">
+          <div class="label">For Authorised Person</div>
+          <div class="row-input"><div style="min-width:80px">Name:</div><input type="text" id="authName2" placeholder=""></div>
+          <div class="row-input"><div style="min-width:80px">Designation:</div><input type="text" id="authDesig2" placeholder=""></div>
+          <div style="height:6px"></div>
+          <div class="stamp-area preview-blur">Stamp &amp; Sign</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 
+      ===============================================================
+      ✅ **BADLAV 2: Remarks Bug Fix**
+      - Parent DIV ko ID ("remarksContainer") di gayi hai.
+      ===============================================================
+    -->
+    <div class="remarks" id="remarksContainer" style="margin-top:12px">
+      <label>Remarks</label>
+      <textarea id="remarks" placeholder="Type remarks here"></textarea>
+    </div>
+
+    <div class="printed-info" id="printedInfo"></div>
+  </article>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- ============================================= -->
+<!-- ✅ NAYA JAVASCRIPT (GOOGLE.SCRIPT.RUN KE SAATH) -->
+<!-- ============================================= -->
+<script>
+/* ========== DOM ========== */
+const gpNoEl = document.getElementById('gpNo');
+const qrcodeEl = document.getElementById('qrcode');
+const previewCopyBadge = document.getElementById('previewCopyBadge');
+const itemsHead = document.getElementById('itemsHead');
+const itemsBody = document.getElementById('itemsBody');
+const toggleTag = document.getElementById('toggleTag');
+const toggleSr = document.getElementById('toggleSr');
+const toggleRemarks = document.getElementById('toggleRemarks');
+const addItemBtn = document.getElementById('addItem');
+const savePrintBtn = document.getElementById('savePrint');
+const downloadPdfBtn = document.getElementById('downloadPdf');
+const fetchDuplicateBtn = document.getElementById('fetchDuplicate');
+const duplicateInput = document.getElementById('duplicateGPNo');
+const printedInfoEl = document.getElementById('printedInfo');
+const gpDateEl = document.getElementById('gpDate');
+const subTotalsEl = document.getElementById('subTotals');
+const unitTotalsEl = document.getElementById('unitTotals');
+
+let items = [];
+let enableTag = false, enableSr = false, enableRemarksFlag = true;
+
+/* Helpers */
+function pad(n,len=4){ return String(n).padStart(len,'0'); }
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function formatDateDDMMMYYYY(iso){ if(!iso) return ''; const d=new Date(iso); const pad2=s=>String(s).padStart(2,'0'); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${pad2(d.getDate())}-${m[d.getMonth()]}-${d.getFullYear()}`; }
+function nowStamp(){ const d=new Date(); const pad2=s=>String(s).padStart(2,'0'); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${pad2(d.getDate())}-${m[d.getMonth()]}-${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; }
+function showToast(msg,ms=2000){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),ms); }
+function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function normalizeText(s=''){ return String(s||'').trim().replace(/\s+/g,' ').split(' ').map(w=>{ return w ? (w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : ''; }).join(' '); }
+/**
+ * ✅ **BADLAV 3: Naya Helper Function**
+ * Mobile number ko print format mein convert karne ke liye.
+ */
+function formatMobilePrint(mobile) {
+  if (!mobile || String(mobile).length !== 10) return mobile; // Agar 10 digit nahi hai toh waise hi dikhao
+  return `+91${mobile.substring(0, 5)}-${mobile.substring(5)}`;
+}
+
+
+/**
+ * === QR CODE FIX (PREVIEW) ===
+ * ✅ REVISED FUNCTION: Ab yeh function QR code ko 70x70 banayega
+ * taaki woh 80x80 box (5px padding ke saath) mein sahi se fit ho.
+ * Yeh nesting div bhi nahi banayega.
+ * ✅ BUG FIX: Ab yeh saare puraane QR elements ko remove karega.
+ */
+async function generateQR(text){
+  // Badge ko chhoode bina, SARE purane QR (canvas/img) HATA DEIN
+  const oldQRs = qrcodeEl.querySelectorAll('canvas, img');
+  oldQRs.forEach(el => el.remove());
+  
+  // Purana wrapper div (agar galti se bana ho) bhi hata dein
+  const oldQRWrapper = qrcodeEl.querySelector('div:not(.copy-badge)');
+  if (oldQRWrapper) {
+    oldQRWrapper.remove(); // Remove the old wrapper
+  }
+  
+  // 'qrcodeEl' (main .qr-box) mein QR banayein.
+  // Library iske andar canvas/img append karegi.
+  // 'display: flex' aur 'justify/align: center' se yeh center mein aa jayega.
+  
+  try{ 
+    new QRCode(qrcodeEl, { // Use the main container
+      text: text || '',
+      width: 70, // 80px (box width) - 5px (pad L) - 5px (pad R) = 70px
+      height: 70, // 80px (box height) - 5px (pad T) - 5px (pad B) = 70px
+      correctLevel: QRCode.CorrectLevel.L
+    }); 
+  }catch(e){ 
+      console.error(e); 
+      // Badge ko bachaate hue error dikhayein
+      const badge = qrcodeEl.querySelector('.copy-badge');
+      qrcodeEl.innerHTML = '';
+      if (badge) qrcodeEl.appendChild(badge);
+      qrcodeEl.appendChild(document.createTextNode('QR Err'));
+  }
+  
+  await new Promise(r => setTimeout(r, 50));
+}
+
+function getQrDataUrl(){ const img = qrcodeEl.querySelector('img'); if(img && img.src) return img.src; const canvas = qrcodeEl.querySelector('canvas'); if(canvas) return canvas.toDataURL('image/png'); return ''; }
+
+/* Table head render */
+function renderHead(){
+  itemsHead.innerHTML='';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<th class="col-sr">Sr</th><th class="col-desc">Item Description</th><th class="col-qty">Qty</th><th class="col-unit">Unit</th>`;
+  if(enableTag) tr.insertAdjacentHTML('beforeend','<th class="col-tag">Tag No</th>');
+  if(enableSr) tr.insertAdjacentHTML('beforeend','<th class="col-srno">SR No</th>');
+  if(enableRemarksFlag) tr.insertAdjacentHTML('beforeend','<th class="col-remark">Remarks</th>');
+  tr.insertAdjacentHTML('beforeend','<th class="col-sr">Action</th>');
+  itemsHead.appendChild(tr);
+}
+function autoResizeTextarea(el){ if(!el) return; el.style.height = 'auto'; const h = el.scrollHeight; el.style.height = (h + 2) + 'px'; }
+
+/* Render items */
+function renderItems(){
+  itemsBody.innerHTML='';
+  items.forEach((it, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="col-sr">${idx+1}</td>
+      <td class="col-desc"><textarea data-i="${idx}" data-f="desc" placeholder="Item description">${escapeHtml(it.desc||'')}</textarea></td>
+      <td class="col-qty"><input type="number" min="0" step="any" data-i="${idx}" data-f="qty" value="${it.qty||''}" placeholder="0"></td>
+      <td class="col-unit">
+        <select data-i="${idx}" data-f="unit">
+          <option${it.unit==='nos'?' selected':''}>nos</option>
+          <option${it.unit==='kg'?' selected':''}>kg</option>
+          <option${it.unit==='ltr'?' selected':''}>ltr</option>
+          <option${it.unit==='box'?' selected':''}>box</option>
+          <option${it.unit==='set'?' selected':''}>set</option>
+        </select>
+      </td>
+    `;
+    if(enableTag) tr.insertAdjacentHTML('beforeend', `<td class="col-tag"><input data-i="${idx}" data-f="tag" value="${escapeHtml(it.tag||'')}" placeholder="Tag No"></td>`);
+    if(enableSr) tr.insertAdjacentHTML('beforeend', `<td class="col-srno"><input data-i="${idx}" data-f="sr" value="${escapeHtml(it.sr||'')}" placeholder="SR No"></td>`);
+    if(enableRemarksFlag) tr.insertAdjacentHTML('beforeend', `<td class="col-remark"><textarea data-i="${idx}" data-f="remark" placeholder="Remarks">${escapeHtml(it.remark||'')}</textarea></td>`);
+    tr.insertAdjacentHTML('beforeend', `<td class="col-sr"><button class="remove-btn" data-i="${idx}">Remove</button></td>`);
+    itemsBody.appendChild(tr);
+  });
+
+  itemsBody.querySelectorAll('textarea[data-f], input[data-f], select[data-f]').forEach(el=>{
+    el.oninput = ()=>{
+      const i = Number(el.dataset.i), f = el.dataset.f;
+      let v = el.value;
+      if(f === 'qty'){ v = v.replace(/[^0-9.]/g,''); el.value = v; }
+      items[i][f] = v;
+      if(el.tagName.toLowerCase() === 'textarea') autoResizeTextarea(el);
+      computeTotals();
+    };
+
+    if(el.tagName.toLowerCase() === 'textarea') { autoResizeTextarea(el); }
+
+    // ✅ ITEM DESCRIPTION FORMAT FIX
+    if (el.tagName.toLowerCase() === 'textarea' && el.dataset.f === 'desc') {
+      el.addEventListener('blur', () => {
+        const i = Number(el.dataset.i);
+        const normalized = normalizeText(el.value);
+        el.value = normalized; // Update the textarea itself
+        items[i].desc = normalized; // Update the data array
+      });
+    }
+  });
+
+  itemsBody.querySelectorAll('.remove-btn').forEach(b=> b.onclick = ()=>{
+    const i = Number(b.dataset.i);
+    items.splice(i,1);
+    renderHead(); renderItems(); computeTotals();
+  });
+
+  computeTotals();
+}
+
+function computeTotals(){
+  const map = {};
+  items.forEach(it=>{
+    const u = it.unit || 'nos';
+    const q = Number(it.qty) || 0;
+    map[u] = (map[u] || 0) + q;
+  });
+  const parts = Object.keys(map).map(k=>`${k}: ${map[k]}`).join(' | ');
+  subTotalsEl.textContent = parts || 'Subtotal: -';
+  unitTotalsEl.textContent = Object.keys(map).length ? `Unit totals: ${parts}` : 'Unit totals: -';
+}
+
+/* Add item */
+addItemBtn.onclick = ()=> {
+  items.push({desc:'',qty:'',unit:'nos',tag:'',sr:'',remark:''});
+  renderHead(); renderItems();
+  setTimeout(()=> {
+    const last = document.querySelector('textarea[data-f="desc"][data-i="'+(items.length-1)+'"]');
+    if(last) last.focus();
+  },50);
+};
+
+/*
+ * ========================================
+ * ✅ **BADLAV 4: Remarks Bug Fix**
+ * Ab yeh 'remarksContainer' (parent div) ko hide/show karega.
+ * ========================================
+ */
+toggleTag.onchange = e => { enableTag = e.target.checked; if(!enableTag) items = items.map(it=>({...it,tag:''})); renderHead(); renderItems(); };
+toggleSr.onchange = e => { enableSr = e.target.checked; if(!enableSr) items = items.map(it=>({...it,sr:''})); renderHead(); renderItems(); };
+toggleRemarks.onchange = e => { 
+  enableRemarksFlag = e.target.checked; 
+  document.getElementById('remarksContainer').style.display = enableRemarksFlag ? 'block' : 'none'; // <-- FIX
+  renderHead(); 
+  renderItems(); 
+};
+
+function attachSmartCaps(){
+  // Normal text fields
+  ['consignor','personCarrying','vehicleNo','authPerson','authName1','authDesig1','authName2','authDesig2','outward1','inward2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('blur', ()=>{ el.value = normalizeText(el.value); });
+  });
+
+  /*
+   * ========================================
+   * ✅ **BADLAV 5: Mobile Number Validation**
+   * Yeh naye mobile field mein sirf numbers hi enter hone dega.
+   * ========================================
+   */
+  const personMobileEl = document.getElementById('personMobile');
+  if (personMobileEl) {
+    personMobileEl.addEventListener('input', () => {
+      personMobileEl.value = personMobileEl.value.replace(/[^0-9]/g, '');
+    });
+  }
+}
+
+/**
+ * ✅ NAYA INIT FUNCTION
+ * Yeh LocalStorage ka istemaal nahi karta.
+ * Yeh seedha Google Sheet se agla number laata hai.
+ */
+(async function init(){
+  // Set defaults
+  gpDateEl.max = todayISO();
+  gpDateEl.value = '';
+  
+  items = [{desc:'',qty:'',unit:'nos',tag:'',sr:'',remark:''}];
+  renderHead(); renderItems(); 
+  attachSmartCaps(); // Mobile validation isi ke andar call ho raha hai
+
+  // ✅ Remarks Bug Fix: Ensure container is visible on load
+  toggleRemarks.checked = true; 
+  enableRemarksFlag = true;
+  document.getElementById('remarksContainer').style.display = 'block'; // <-- FIX
+
+  // Handlers define karein
+  function onGpSuccess(nextGPNumber) {
+    gpNoEl.textContent = nextGPNumber;
+    const qrDetailsPreview = `GP No: ${nextGPNumber}\n(Preview)`;
+    generateQR(qrDetailsPreview); // Ab QR generate karein
+  }
+
+  function onGpFailure(error) {
+    console.error(error);
+    gpNoEl.textContent = "Error!";
+    alert("Error loading next Gate Pass number: " + error.message);
+  }
+
+  // ✅ Backend ko call karein naya number laane ke liye
+  google.script.run
+    .withSuccessHandler(onGpSuccess)
+    .withFailureHandler(onGpFailure)
+    .getNextGatePassNumber(); // Yeh Code.gs mein 'getNextGatePassNumber' ko call karta hai
+
+})();
+
+
+document.getElementById('resetBtn').onclick = ()=> { if(confirm('Reset form?')) location.reload(); };
+
+/*
+ * ========================================
+ * ✅ GOOGLE.SCRIPT.RUN IMPLEMENTATION
+ * ========================================
+ */
+
+/**
+ * ✅ NAYA saveToServer function
+ * Yeh google.script.run ka istemaal karta hai (fetch ki jagah).
+ */
+async function saveToServer(payload) {
+  return new Promise((resolve, reject) => {
+    google.script.run
+      .withSuccessHandler(response => {
+        resolve(response);
+      })
+      .withFailureHandler(error => {
+        reject(new Error(error.message));
+      })
+      .saveData(payload); // Yeh Code.gs mein 'saveData' function ko call karta hai
+  });
+}
+
+/**
+ * ✅ NAYA duplicate fetch
+ * Yeh google.script.run ka istemaal karta hai (fetch ki jagah).
+ */
+fetchDuplicateBtn.onclick = async ()=>{
+  const oldNo = duplicateInput.value.trim();
+  if(!oldNo){ showToast('Enter Gate Pass No.'); duplicateInput.focus(); return; }
+  showToast('Fetching record...');
+
+  function onFetchFailure(error) {
+    console.error(error);
+    alert('Error fetching duplicate: ' + error.message);
+  }
+
+  async function onFetchSuccess(json) {
+    if(!json.success){ 
+      alert('No record found for ' + oldNo + '. Error: ' + (json.error || 'Unknown')); 
+      return; 
+    }
+
+    gpNoEl.textContent = json.gate_pass_no + ' (Duplicate)';
+    document.getElementById('gpDate').value = json.date || '';
+    document.getElementById('consignor').value = json.consignor || '';
+    document.getElementById('personCarrying').value = json.person_carrying || '';
+    document.getElementById('vehicleNo').value = json.vehicle_no || '';
+    document.getElementById('authPerson').value = json.authorised_person || '';
+    document.getElementById('remarks').value = json.remarks || '';
+    
+    // ✅ **BADLAV 6: Mobile No. ko duplicate mein load karna**
+    document.getElementById('personMobile').value = json.person_mobile || ''; 
+    
+    // DUPLICATE FETCH FIX
+    document.getElementById('authName1').value = json.authName1 || '';
+    document.getElementById('authDesig1').value = json.authDesig1 || '';
+
+    try{ items = JSON.parse(json.items||'[]'); } catch(e){ items = []; }
+
+    enableTag = items.some(it=>it.tag && it.tag.length>0);
+    enableSr  = items.some(it=>it.sr && it.sr.length>0);
+    toggleTag.checked = enableTag; toggleSr.checked = enableSr;
+
+    // ✅ Remarks Bug Fix: Duplicate fetch pe bhi remarks container ko set karna
+    enableRemarksFlag = true; // Assume remarks are enabled if they exist
+    if (json.remarks) {
+      document.getElementById('remarksContainer').style.display = 'block';
+      toggleRemarks.checked = true;
+    }
+
+    renderHead(); renderItems();
+    
+    // ✅ QR CODE FIX: Data kam kar diya gaya hai
+    const qrDetails = `GP No: ${json.gate_pass_no}\nDate: ${json.date || ''}`;
+    await generateQR(qrDetails);
+    
+    showToast('Duplicate loaded — ready to print');
+  }
+
+  // Yahaan call kiya ja raha hai
+  google.script.run
+    .withSuccessHandler(onFetchSuccess)
+    .withFailureHandler(onFetchFailure) // ✅ BUG FIX: Was 'onFailure', changed to 'onFetchFailure'
+    .fetchRecord(oldNo); // Yeh Code.gs mein 'fetchRecord' ko call karta hai
+};
+
+/*
+ * ========================================
+ * ✅ PDF & PRINT FUNCTIONS
+ * ========================================
+ */
+
+// === BORDER/LABEL FIX (PRINT) ===
+// This CSS is now the master template for Print.
+// ✅ REVISION: Border mota kar diya hai (2px se 3px)
+// ✅ REVISION: Items ko fit karne ke liye margins/padding/heights kam ki gayi
+const PRINT_CSS = `
+    :root{--border:#cfcfcf;--muted:#6b7280;--accent:#0b5394}
+    body{font-family:Inter,Arial,Helvetica;margin:0;color:#06203a;-webkit-print-color-adjust: exact; print-color-adjust: exact;}
+    @page{size:A4;margin:10mm} /* Standard 10mm margin for printing */
+    
+    /* NEW: Wrapper to hold one page's content and footer */
+    .print-page-wrapper {
+        position: relative;
+        min-height: 277mm; /* Full A4 height minus margins */
+        page-break-after: always;
+    }
+    .print-page-wrapper:last-child {
+        page-break-after: avoid;
+    }
+
+    .paper{
+      /* width:210mm; <-- YEH GALAT THA, HATA DIYA */
+      /* min-height: 277mm; <-- YEH HATA DIYA HAI */ 
+      box-sizing:border-box;
+      padding:10mm; /* 10mm padding inside */
+      position:relative; 
+      /* === BORDER FIX: Ab outline istemaal ho raha hai === */
+      border: none; 
+      outline: 3px solid #000; 
+      outline-offset: -3px; /* Border ko page ke andar kar diya */
+      box-shadow: none; /* Shadow hata diya */
+      /* page-break-after: always; REMOVED */
+    }
+    
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3mm} /* Was 4mm */
+    .logo img{height:60px;width:60px} /* Was 70px */
+    .title{flex:1;text-align:center;margin:0 8px}
+    .title h1{margin:0;font-size:20px;font-weight:800}
+    .title p{margin:0;font-size:15px;font-weight:800;color:#6b7280} /* Was 16px */
+    
+    .qr{width:80px;height:80px;text-align:center} /* Was 85px */
+    .qr img{width:80px;height:80px;} /* Was 85px */
+    
+    table{width:100%;border-collapse:collapse;font-size:12px;margin-top:3mm} /* Was 4mm */
+    table thead th{border-bottom:1px solid #ddd;padding:6px;text-align:left;background:#fafafa}
+    table td{padding:2px 6px;border-bottom:1px solid #f3f3f3;vertical-align:top} /* Was 3px 6px */
+    .sig-outer{border:2px solid #d1d5db;border-radius:6px;padding:6px;margin-top:2mm} /* Was 8px padding, 3mm margin */
+    .sig-row{display:flex;gap:6px;flex-wrap:wrap} /* Was 8px */
+    .sig-block{flex:1;border:1px solid #d8dee4;border-radius:6px;padding:4px;min-height:85px;display:flex;flex-direction:column;gap:2px} /* Was 6px padding, 100px min-height, 4px gap */
+    
+    .stamp-area{
+        margin-top:4px;
+        border-top:1.5px dashed #cfd8e3;
+        padding-top:4px; /* Was 6px */
+        height:30px; /* Was 40px */
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:700;
+        background:transparent;
+        color: #ccc; 
+    }
+    
+    /* MODIFIED: Footer positioned at bottom of the wrapper */
+    .footer{
+        position: absolute;
+        bottom: 0; /* Bottom of the 277mm wrapper */
+        right: 0;  /* Right of the wrapper */
+        text-align:right;
+        font-size:12px;
+        color:#333;
+    }
+    
+    /* === LABEL FIX (PRINT) === */
+    .copy-label{ 
+        position:absolute;
+        left:50%;
+        transform:translateX(-50%);
+        top:8mm; /* Original position */
+        font-weight:900;
+        opacity:1;
+        font-size:14px;
+        text-decoration:none; /* Underline hata di gayi */
+        letter-spacing:1px;
+    } 
+    
+    .copy-sub{display:block;font-size:12px;margin-top:2px;opacity:0.9}
+    .watermark{
+      position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);
+      opacity:.06;width:62%;
+    }
+    .note{margin-top:3mm;font-weight:700;color:#b91c1c} /* Was 4mm */
+  `;
+
+
+/**
+ * ✅ PDF/PRINT FIX: Yeh function ab sirf 4 pages ka HTML string return karta hai.
+ */
+function makePrintableHTML(labelSuffix='', copyLabel='OFFICE COPY'){
+  const gpNo = gpNoEl.textContent;
+  const type = document.getElementById('gpType').value;
+  const dateIso = document.getElementById('gpDate').value || '';
+  const date = formatDateDDMMMYYYY(dateIso);
+  const consignor = document.getElementById('consignor').value || '';
+  const person = document.getElementById('personCarrying').value || '';
+  const auth = document.getElementById('authPerson').value || '';
+  const remarks = document.getElementById('remarks').value || '';
+  const consigneeUnit = document.getElementById('consignee').value || 'GWTPL Abohar';
+  const abo = document.getElementById('aboTitle').textContent || 'Abohar';
+  const qrData = getQrDataUrl(); 
+  const hasTag = enableTag;
+  const hasSr = enableSr;
+  const hasRemarksCol = enableRemarksFlag;
+
+  const mobile = document.getElementById('personMobile').value || '';
+  const mobilePrint = formatMobilePrint(mobile); 
+
+  let itemsRows = items.map((it, idx)=>{
+    return `<tr>
+      <td>${idx+1}</td>
+      <td>${escapeHtml(it.desc||'')}</td>
+      <td style="text-align:center">${Number(it.qty)||0}</td>
+      <td>${escapeHtml(it.unit||'nos')}</td>
+      ${hasTag?`<td>${escapeHtml(it.tag||'')}</td>`:''}
+      ${hasSr?`<td>${escapeHtml(it.sr||'')}</td>`:''}
+      ${hasRemarksCol?`<td>${escapeHtml(it.remark||'')}</td>`:''}
+    </tr>`;
+  }).join('');
+  if(!itemsRows) itemsRows = `<tr><td colspan="${4 + (hasTag?1:0) + (hasSr?1:0) + (hasRemarksCol?1:0)}">No items</td></tr>`;
+
+  const authPrint = auth ? ((/^mr\.?\s/i.test(auth)) ? normalizeText(auth) : 'Mr. ' + normalizeText(auth)) : '';
+  const personPrint = person ? ((/^mr\.?\s/i.test(person)) ? normalizeText(person) : 'Mr. ' + normalizeText(person)) : '';
+  const authName1Val = normalizeText(document.getElementById('authName1').value||'');
+  const sigName1 = authName1Val ? ((/^mr\.?\s/i.test(authName1Val)) ? authName1Val : 'Mr. ' + authName1Val) : '';
+  const authName2Val = normalizeText(document.getElementById('authName2').value||'');
+  const sigName2 = authName2Val ? ((/^mr\.?\s/i.test(authName2Val)) ? authName2Val : 'Mr. ' + authName2Val) : '';
+  const vehicle = document.getElementById('vehicleNo').value || '';
+  
+  function makePage(label){
+    return `
+      <!-- ✅ NEW WRAPPER -->
+      <div class="print-page-wrapper">
+        <!-- .paper ab content border ke liye hai -->
+        <div class="paper">
+          <!-- === LABEL FIX (PRINT) === -->
+          <div class="copy-label">${'['+label+']'}<span class="copy-sub"></span></div>
+          
+          <div class="watermark"><img src="https://gwtpl.co/logo.png" alt="wm" style="width:100%"></div>
+
+          <div class="header">
+            <!-- ✅ LOGO RE-ADDED -->
+            <div class="logo"><img src="https://gwtpl.co/logo.png" alt="logo"></div>
+            <div class="title">
+              <h1>Globus Warehousing and Trading Pvt. Ltd.</h1>
+              <p>${abo}</p>
+            </div>
+            <div class="qr">
+              <img src="${qrData}" alt="qr">
+              <!-- No label under QR code in print/pdf -->
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1">
+              <strong>Gate Pass No.</strong><div>${gpNo}</div>
+              <div style="margin-top:8px"><strong>Type</strong><div>${type}</div></div>
+              <div style="margin-top:8px"><strong>Date</strong><div>${date || '—'}</div></div>
+            </div>
+            <div style="width:320px">
+              <div style="margin-top:6px"><strong>Consignee Unit:</strong> ${escapeHtml(consigneeUnit)}</div>
+              <div style="margin-top:6px"><strong>Consignor Unit:</strong> ${escapeHtml(normalizeText(consignor))}</div>
+              <div style="margin-top:6px"><strong>Authority Person:</strong> ${escapeHtml(authPrint)}</div>
+              <div style="margin-top:6px"><strong>Person Carrying:</strong> ${escapeHtml(personPrint)}</div>
+              <div style="margin-top:6px"><strong>Vehicle No.:</strong> ${escapeHtml(vehicle.trim().toUpperCase())}</div>
+              <div style="margin-top:6px"><strong>Person Mob No.:</strong> ${escapeHtml(mobilePrint)}</div>
+            </div>
+          </div>
+
+          <table aria-label="items">
+            <thead>
+              <tr>
+                <th style="width:5%">Sr</th>
+                <th style="width:45%">Item Description</th>
+                <th style="width:10%">Qty</th>
+                <th style="width:10%">Unit</th>
+                ${hasTag?'<th style="width:12%">Tag No</th>':''}
+                ${hasSr?'<th style="width:12%">SR No</th>':''}
+                ${hasRemarksCol?'<th style="width:18%">Remarks</th>':''}
+              </tr>
+            </thead>
+            <tbody>${itemsRows}</tbody>
+          </table>
+
+          <div style="margin-top:8px;font-weight:700">Unit totals: ${subTotalsEl.textContent.replace('Subtotal: ','')}</div>
+
+          <div class="note">Goods are not for sale — only site to site transfer</div>
+
+          <div class="sig-outer">
+            <strong>Consignee / Issued By</strong>
+            <div class="sig-row" style="margin-top:8px">
+              <div class="sig-block">
+                <div><strong>For Security</strong></div>
+                <div style="margin-top:6px">Outward Reg. Sr No: ${escapeHtml(document.getElementById('outward1').value || '')}</div>
+                <div style="margin-top:6px">Date: ${formatDateDDMMMYYYY(document.getElementById('secDate1').value || '')}</div>
+                <div class="stamp-area">Stamp &amp; Sign</div>
+              </div>
+              <div class="sig-block">
+                <div><strong>For Authorised Person</strong></div>
+                <div style="margin-top:6px">Name: ${escapeHtml(sigName1)}</div>
+                <div style="margin-top:6px">Designation: ${escapeHtml(normalizeText(document.getElementById('authDesig1').value||''))}</div>
+                <div class="stamp-area">Stamp &amp; Sign</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sig-outer" style="margin-top:4mm"> <!-- Was 6mm -->
+            <strong>Consignor Unit / Received By</strong>
+            <div class="sig-row" style="margin-top:8px">
+              <div class="sig-block">
+                <div><strong>For Security</strong></div>
+                <div style="margin-top:6px">Inward Reg. Sr No: ${escapeHtml(document.getElementById('inward2').value||'')}</div>
+                <div style="margin-top:6px">Date: </div>
+                <div class="stamp-area">Stamp &amp; Sign</div>
+              </div>
+              <div class="sig-block">
+                <div><strong>For Authorised Person</strong></div>
+                <div style="margin-top:6px">Name: ${escapeHtml(sigName2)}</div>
+                <div style="margin-top:6px">Designation: ${escapeHtml(normalizeText(document.getElementById('authDesig2').value||''))}</div>
+                <div class="stamp-area">Stamp &amp; Sign</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:8px"><strong>Remarks:</strong> ${escapeHtml(remarks)}</div>
+
+        <!-- .paper yahaan band hota hai -->
+        </div>
+        
+        <!-- Footer ab .paper se baahar hai -->
+        <div class="footer">Printed On: ${nowStamp()} — GP: ${gpNo}</div>
+      
+      <!-- .print-page-wrapper yahaan band hota hai -->
+      </div>
+    `;
+  }
+
+  // === PRINT LABEL FIX ===
+  // Hamesha 'OFFICE COPY' / 'SECURITY COPY' hi dikhayein, 'DUPLICATE' nahi.
+  const pages = [
+    makePage('OFFICE COPY'),
+    makePage('OFFICE COPY'),
+    makePage('SECURITY COPY'),
+    makePage('SECURITY COPY')
+  ];
+
+  return pages.join(''); 
+}
+
+/* Print flow (Save to server then print 4 copies) */
+savePrintBtn.onclick = async ()=>{
+  if(!gpDateEl.value){ alert('Please select Date'); gpDateEl.focus(); return; }
+
+  const payload = {
+    gate_pass_no: '', // Server will generate this
+    date: gpDateEl.value,
+    consignor: normalizeText(document.getElementById('consignor').value||''),
+    person_carrying: normalizeText(document.getElementById('personCarrying').value||''),
+    vehicle_no: normalizeText(document.getElementById('vehicleNo').value||''), 
+    auth_person: normalizeText(document.getElementById('authPerson').value||''),
+    person_mobile: document.getElementById('personMobile').value || '', 
+    type: document.getElementById('gpType').value,
+    items: items.filter(it => it.desc || it.qty), 
+    authName1: normalizeText(document.getElementById('authName1').value||''),
+    authDesig1: normalizeText(document.getElementById('authDesig1').value||''),
+    remarks: document.getElementById('remarks').value||''
+  };
+
+  savePrintBtn.disabled = true; savePrintBtn.textContent = 'Saving...';
+  showToast('Saving...');
+
+  const res = await saveToServer(payload);
+  
+  if(res && res.success && res.gate_pass_no){
+    // ✅ SUCCESS
+    gpNoEl.textContent = res.gate_pass_no;
+    showToast('Saved: ' + res.gate_pass_no);
+    
+    const qrDetails = `GP No: ${res.gate_pass_no}\nDate: ${payload.date}`;
+    await generateQR(qrDetails); // Wait for QR
+    
+    printedInfoEl.textContent = `Printed On: ${nowStamp()} | GP: ${res.gate_pass_no}`;
+
+    // ✅ PRINT FIX: Ab poora HTML yahin banta hai
+    const pagesHTML = makePrintableHTML('','OFFICE COPY');
+    const finalHTML = `<!doctype html><html><head><meta charset="utf-8"><title>Gate Pass ${res.gate_pass_no}</title><style>${PRINT_CSS}</style></head><body>${pagesHTML}</body></html>`;
+
+    const w = window.open('','_blank');
+    w.document.open();
+    w.document.write(finalHTML);
+    w.document.close();
+    setTimeout(()=>{ w.focus(); w.print(); showToast('Print dialog opened'); savePrintBtn.disabled=false; savePrintBtn.textContent='Save & Print'; }, 900);
+
+  } else {
+    // ❌ FAILURE
+    alert(`Save Error: ${res.error || 'Unknown error'}. Please try again.`);
+    savePrintBtn.disabled = false; 
+    savePrintBtn.textContent = 'Save & Print';
+    
+    // ✅ Naya number dobara fetch karein taaki sync mein rahe
+    gpNoEl.textContent = "Re-syncing...";
+    google.script.run
+      .withSuccessHandler(nextGPNumber => {
+          gpNoEl.textContent = nextGPNumber;
+          generateQR(`GP No: ${nextGPNumber}\n(Preview)`);
+      })
+      .withFailureHandler(() => gpNoEl.textContent = "Error!")
+      .getNextGatePassNumber();
+  }
+};
+
+
+/**
+ * === PDF DOWNLOAD FIX ===
+ */
+downloadPdfBtn.onclick = async ()=>{
+  const gpNo = gpNoEl.textContent; 
+  if (gpNo === "Loading..." || gpNo === "Error!") {
+    alert("Please wait for Gate Pass number to load.");
+    return;
+  }
+  
+  const filename = gpNo.replace(/\//g,'-') + '.pdf';
+  showToast('Generating PDF...');
+  
+  const qrDetails = `GP No: ${gpNo}\nDate: ${gpDateEl.value}`;
+  await generateQR(qrDetails);
+  
+  // 1. Pages ka HTML generate karein
+  const pagesHTML = makePrintableHTML('','OFFICE COPY'); 
+  
+  // 2. PDF ke liye CSS ko modify karein
+  const PDF_CSS = PRINT_CSS
+    .replace(
+      /top:8mm;/g, 
+      'top:12mm;' // Label ko thoda neeche karein taaki kate nahi
+    );
+    // Ab border replace ki zaroorat nahi, kyunki dono outline use karte hain
+
+  // 3. Ek naya container banayein
+  const container = document.createElement('div');
+  /* container.style.width = '210mm'; <-- YEH PDF MEIN BORDER NA DIKHNE KA KAARAN THA */
+  
+  // 4. Container mein MODIFIED CSS aur HTML daalein
+  container.innerHTML = `<style>${PDF_CSS}</style>${pagesHTML}`;
+  
+  await new Promise(r => setTimeout(r, 100));
+
+  // 5. PDF generate karne ke liye Options
+  const opt = {
+    margin: 0, // CSS padding/margin ko control karega
+    filename: filename, 
+    image: {type:'jpeg', quality:0.98},
+    html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        logging:false 
+    },
+    jsPDF: {unit:'mm', format:'a4', orientation:'portrait'}
+  };
+  
+  // 6. PDF generate karein
+  html2pdf().from(container).set(opt).save().then(()=>{
+    showToast('PDF saved: ' + filename, 2200);
+  }).catch(err=>{
+    console.error(err);
+    showToast('PDF generation failed');
+  });
+};
+
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey && e.key === 'Enter'){ addItemBtn.click(); }
+  if(e.key === 'Escape'){ duplicateInput.value=''; }
+});
+
+showToast('Ready — Hosted on Google!',1200);
+</script>
+</body>
+</html>
