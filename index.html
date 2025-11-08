@@ -37,7 +37,7 @@
   @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   #preloader h3{margin-top:18px;color:var(--text-dark);font-weight:600;font-size:15px}
 
-  /* ✅ Apple-style Success Animation */
+  /* ✅ Success Box */
   #success-box {
     display:none;position:fixed;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(0.95);
@@ -55,10 +55,7 @@
     position: relative;
     display: inline-block;
   }
-  svg {
-    width: 100px;
-    height: 100px;
-  }
+  svg {width: 100px;height: 100px;}
   .checkmark__circle {
     stroke: var(--success);
     stroke-width: 6;
@@ -114,8 +111,13 @@
   .view-logs-btn:hover{transform:scale(1.05);}
 
   /* Modal */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;justify-content:center;align-items:center;z-index:20;}
-  .modal-backdrop.visible{display:flex;}
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,0.45);
+    display:none;justify-content:center;align-items:center;z-index:20;
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .modal-backdrop.visible{display:flex;opacity:1;transform:scale(1);}
+  .modal-backdrop.fade-out{opacity:0;transform:scale(0.97);}
   .modal{width:90%;max-width:340px;background:#fff;padding:22px;border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.25);text-align:left;position:relative;}
   .modal h3{margin:0 0 12px;color:var(--blue-main)}
   .close-icon{position:absolute;top:10px;right:12px;font-size:20px;color:#999;cursor:pointer;transition:.25s}
@@ -177,7 +179,7 @@
 
 <script>
 const LOGS_URL="https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?pli=1&gid=0#gid=0";
-const LOGS_PASSWORD="Chander5383";
+const LOGS_PASSWORD="Chander@5383";
 const redirectURL="https://script.google.com/macros/s/AKfycbwvZfGcEC00nEu_fHxMOPWyy_NMsVtYo__YSKZ6P66pfqbKXUlf9xjMK1LKMX3VqYslJA/exec";
 
 let redirectEnabled=true,redirectTimeout=null;
@@ -199,18 +201,24 @@ function stopRedirect(){redirectEnabled=false;clearTimeout(redirectTimeout);}
 
 openBtn.addEventListener("click",()=>{stopRedirect();backdrop.classList.add("visible");input.value="";errorEl.textContent="";attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";input.focus();});
 
-function closeModalAction(){backdrop.classList.remove("visible");redirectEnabled=true;startRedirect();}
+function closeModalAction(){
+  backdrop.classList.add("fade-out");
+  setTimeout(()=>{
+    backdrop.classList.remove("fade-out");
+    backdrop.classList.remove("visible");
+    redirectEnabled=true;
+    startRedirect();
+  },300);
+}
 cancelBtn.addEventListener("click",closeModalAction);
 closeModal.addEventListener("click",closeModalAction);
 
-  document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape" && backdrop.classList.contains("visible")) {
-    backdrop.classList.remove("visible");
-    redirectEnabled = true;
-    startRedirect();
+/* ✅ ESC key closes popup smoothly */
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape" && backdrop.classList.contains("visible")){
+    closeModalAction();
   }
 });
-
 
 submitBtn.addEventListener("click",()=>{if(attempts>=MAX_ATTEMPTS){return;}if(input.value===LOGS_PASSWORD){redirectEnabled=false;backdrop.classList.remove("visible");preloader.classList.remove("hidden");preloader.querySelector("h3").textContent="Access Granted...";successBox.classList.remove("visible");setTimeout(()=>{preloader.classList.add("hidden");successBox.classList.add("visible");setTimeout(()=>{window.open(LOGS_URL,"_blank");},1500);},800);}else{attempts++;const left=MAX_ATTEMPTS-attempts;if(left>0){errorEl.textContent=`Incorrect password. ${left} attempt(s) left.`;}else{let countdown=UNLOCK_DELAY;errorEl.textContent=`Access blocked. Wait ${countdown}s…`;input.disabled=true;submitBtn.disabled=true;toggleEye.style.display="none";const timer=setInterval(()=>{countdown--;if(countdown>0){errorEl.textContent=`Access blocked. Wait ${countdown}s…`;}else{clearInterval(timer);attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";errorEl.textContent="";}},1000);}}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter")submitBtn.click();});
