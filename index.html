@@ -203,6 +203,15 @@ function closeModalAction(){backdrop.classList.remove("visible");redirectEnabled
 cancelBtn.addEventListener("click",closeModalAction);
 closeModal.addEventListener("click",closeModalAction);
 
+  document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape" && backdrop.classList.contains("visible")) {
+    backdrop.classList.remove("visible");
+    redirectEnabled = true;
+    startRedirect();
+  }
+});
+
+
 submitBtn.addEventListener("click",()=>{if(attempts>=MAX_ATTEMPTS){return;}if(input.value===LOGS_PASSWORD){redirectEnabled=false;backdrop.classList.remove("visible");preloader.classList.remove("hidden");preloader.querySelector("h3").textContent="Access Granted...";successBox.classList.remove("visible");setTimeout(()=>{preloader.classList.add("hidden");successBox.classList.add("visible");setTimeout(()=>{window.open(LOGS_URL,"_blank");},1500);},800);}else{attempts++;const left=MAX_ATTEMPTS-attempts;if(left>0){errorEl.textContent=`Incorrect password. ${left} attempt(s) left.`;}else{let countdown=UNLOCK_DELAY;errorEl.textContent=`Access blocked. Wait ${countdown}s…`;input.disabled=true;submitBtn.disabled=true;toggleEye.style.display="none";const timer=setInterval(()=>{countdown--;if(countdown>0){errorEl.textContent=`Access blocked. Wait ${countdown}s…`;}else{clearInterval(timer);attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";errorEl.textContent="";}},1000);}}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter")submitBtn.click();});
 toggleEye.addEventListener("click",()=>{const type=input.getAttribute("type")==="password"?"text":"password";input.setAttribute("type",type);toggleEye.textContent=type==="password"?"👁️":"🙈";});
