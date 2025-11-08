@@ -22,6 +22,7 @@
     overflow: hidden;
   }
 
+  /* Background animation */
   .mesh-bg {position: fixed;inset: 0;overflow: hidden;z-index: 0;}
   .blob {position: absolute;border-radius: 50%;filter: blur(70px);opacity: 0.8;animation: moveBlob 18s ease-in-out infinite alternate;}
   .blob1 {width: 650px;height: 650px;background: #b6d7ff;top: -150px;left: -200px;}
@@ -29,6 +30,7 @@
   .blob3 {width: 550px;height: 550px;background: #9bc5ff;top: 70%;left: 10%;animation-delay: 4s;}
   @keyframes moveBlob {0% {transform: translate(0,0) scale(1);}50% {transform: translate(40px,-40px) scale(1.08);}100% {transform: translate(-40px,40px) scale(0.96);}}
 
+  /* Preloader */
   #preloader {position: fixed;inset: 0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2;transition:opacity .8s ease;}
   #preloader.hidden{opacity:0;visibility:hidden}
   #preloader img{width:100px;animation:floatLogo 2.2s ease-in-out infinite}
@@ -37,7 +39,7 @@
   @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   #preloader h3{margin-top:18px;color:var(--text-dark);font-weight:600;font-size:15px}
 
-  /* ✅ Success Box */
+  /* ✅ Success Box (Apple style) */
   #success-box {
     display:none;position:fixed;top:50%;left:50%;
     transform:translate(-50%,-50%) scale(0.95);
@@ -48,83 +50,44 @@
     transition:opacity .8s ease, transform .8s ease;
   }
   #success-box.visible{display:block;opacity:1;transform:translate(-50%,-50%) scale(1);}
-
-  .checkmark {
-    width: 100px;
-    height: 100px;
-    position: relative;
-    display: inline-block;
-  }
-  svg {width: 100px;height: 100px;}
-  .checkmark__circle {
-    stroke: var(--success);
-    stroke-width: 6;
-    fill: none;
-    stroke-dasharray: 283;
-    stroke-dashoffset: 283;
-    animation: circleDraw 0.7s ease-out forwards;
-  }
-  .checkmark__check {
-    stroke: var(--success);
-    stroke-width: 6;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-dasharray: 70;
-    stroke-dashoffset: 70;
-    animation: checkDraw 0.4s 0.6s ease-out forwards;
-  }
-  .checkmark__pulse {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: rgba(0,179,107,0.25);
-    transform: scale(0);
-    animation: pulse 1.2s 0.9s ease-out forwards;
-    z-index: -1;
-  }
-
-  @keyframes circleDraw {to {stroke-dashoffset: 0;}}
-  @keyframes checkDraw {to {stroke-dashoffset: 0;}}
-  @keyframes pulse {
-    0% {transform: scale(0.6);opacity: 1;}
-    70% {transform: scale(1.6);opacity: 0.4;}
-    100% {transform: scale(2.3);opacity: 0;}
-  }
-
-  #success-box h4{
-    color:var(--blue-main);font-weight:600;font-size:17px;
-    margin-top:18px;letter-spacing:0.5px;
-  }
+  .checkmark {width:100px;height:100px;position:relative;display:inline-block;}
+  svg {width:100px;height:100px;}
+  .checkmark__circle {stroke: var(--success);stroke-width:6;fill:none;stroke-dasharray:283;stroke-dashoffset:283;animation:circleDraw .7s ease-out forwards;}
+  .checkmark__check {stroke: var(--success);stroke-width:6;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70;animation:checkDraw .4s .6s ease-out forwards;}
+  .checkmark__pulse {position:absolute;top:0;left:0;width:100px;height:100px;border-radius:50%;background:rgba(0,179,107,.25);transform:scale(0);animation:pulse 1.2s .9s ease-out forwards;z-index:-1;}
+  @keyframes circleDraw {to{stroke-dashoffset:0;}}
+  @keyframes checkDraw {to{stroke-dashoffset:0;}}
+  @keyframes pulse {0%{transform:scale(.6);opacity:1;}70%{transform:scale(1.6);opacity:.4;}100%{transform:scale(2.3);opacity:0;}}
+  #success-box h4{color:var(--blue-main);font-weight:600;font-size:17px;margin-top:18px;letter-spacing:.5px;}
 
   .footer{position:fixed;bottom:12px;width:100%;text-align:center;font-size:13px;color:#8aa5c6}
-  .view-logs-btn{
-    position:fixed;top:16px;right:18px;z-index:10;
-    background:linear-gradient(90deg,var(--blue-main),var(--blue-light));
-    color:#fff;border:none;padding:10px 14px;font-weight:600;border-radius:10px;
-    cursor:pointer;box-shadow:0 4px 12px rgba(0,123,255,0.2);
-    transition:transform 0.2s ease;
-  }
+  .view-logs-btn{position:fixed;top:16px;right:18px;z-index:10;background:linear-gradient(90deg,var(--blue-main),var(--blue-light));color:#fff;border:none;padding:10px 14px;font-weight:600;border-radius:10px;cursor:pointer;box-shadow:0 4px 12px rgba(0,123,255,0.2);transition:transform .2s ease;}
   .view-logs-btn:hover{transform:scale(1.05);}
 
   /* Modal */
   .modal-backdrop{
-    position:fixed;inset:0;background:rgba(0,0,0,0.45);
-    display:none;justify-content:center;align-items:center;z-index:20;
+    position:fixed;inset:0;background:rgba(0,0,0,.45);
+    display:none;justify-content:center;align-items:center;
+    z-index:20;opacity:0;transform:scale(0.97);
     transition:opacity .3s ease, transform .3s ease;
   }
   .modal-backdrop.visible{display:flex;opacity:1;transform:scale(1);}
   .modal-backdrop.fade-out{opacity:0;transform:scale(0.97);}
-  .modal{width:90%;max-width:340px;background:#fff;padding:22px;border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.25);text-align:left;position:relative;}
+  .modal{width:90%;max-width:340px;background:#fff;padding:22px;border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,.25);text-align:left;position:relative;}
   .modal h3{margin:0 0 12px;color:var(--blue-main)}
   .close-icon{position:absolute;top:10px;right:12px;font-size:20px;color:#999;cursor:pointer;transition:.25s}
   .close-icon:hover{color:var(--blue-main);transform:scale(1.2)}
   .password-wrapper{position:relative}
   .password-wrapper input{width:100%;padding:12px 42px 12px 12px;border:1.8px solid #cfdfff;border-radius:10px;font-size:15px;outline:none;box-sizing:border-box;}
-  .password-wrapper input:focus{border-color:var(--blue-main);box-shadow:0 0 6px rgba(0,123,255,0.25);}
+  .password-wrapper input:focus{border-color:var(--blue-main);box-shadow:0 0 6px rgba(0,123,255,.25);}
+  
+  /* 👁 Hide default browser eye icon */
+  input::-ms-reveal,
+  input::-ms-clear,
+  input::-webkit-credentials-auto-fill-button {
+    display: none !important;
+  }
+
   .password-wrapper .toggle-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:#6c8ebf;}
   .modal button{padding:9px 12px;border-radius:8px;font-weight:600;border:none;cursor:pointer;margin-top:10px}
   .modal .primary{background:var(--blue-main);color:white}
@@ -146,7 +109,6 @@
   <h3>Initializing GWTPL Abohar Portal...</h3>
 </div>
 
-<!-- ✅ Apple Wallet–style Success -->
 <div id="success-box">
   <div class="checkmark">
     <svg viewBox="0 0 100 100">
@@ -160,7 +122,6 @@
 
 <button class="view-logs-btn" id="open-logs-btn">View Logs</button>
 
-<!-- Password Modal -->
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal">
     <span class="close-icon" id="close-modal">❌</span>
@@ -179,7 +140,7 @@
 
 <script>
 const LOGS_URL="https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?pli=1&gid=0#gid=0";
-const LOGS_PASSWORD="Chander@5383";
+const LOGS_PASSWORD="Chander@123";
 const redirectURL="https://script.google.com/macros/s/AKfycbwvZfGcEC00nEu_fHxMOPWyy_NMsVtYo__YSKZ6P66pfqbKXUlf9xjMK1LKMX3VqYslJA/exec";
 
 let redirectEnabled=true,redirectTimeout=null;
@@ -204,8 +165,7 @@ openBtn.addEventListener("click",()=>{stopRedirect();backdrop.classList.add("vis
 function closeModalAction(){
   backdrop.classList.add("fade-out");
   setTimeout(()=>{
-    backdrop.classList.remove("fade-out");
-    backdrop.classList.remove("visible");
+    backdrop.classList.remove("fade-out","visible");
     redirectEnabled=true;
     startRedirect();
   },300);
@@ -213,11 +173,8 @@ function closeModalAction(){
 cancelBtn.addEventListener("click",closeModalAction);
 closeModal.addEventListener("click",closeModalAction);
 
-/* ✅ ESC key closes popup smoothly */
 document.addEventListener("keydown",function(e){
-  if(e.key==="Escape" && backdrop.classList.contains("visible")){
-    closeModalAction();
-  }
+  if(e.key==="Escape" && backdrop.classList.contains("visible")) closeModalAction();
 });
 
 submitBtn.addEventListener("click",()=>{if(attempts>=MAX_ATTEMPTS){return;}if(input.value===LOGS_PASSWORD){redirectEnabled=false;backdrop.classList.remove("visible");preloader.classList.remove("hidden");preloader.querySelector("h3").textContent="Access Granted...";successBox.classList.remove("visible");setTimeout(()=>{preloader.classList.add("hidden");successBox.classList.add("visible");setTimeout(()=>{window.open(LOGS_URL,"_blank");},1500);},800);}else{attempts++;const left=MAX_ATTEMPTS-attempts;if(left>0){errorEl.textContent=`Incorrect password. ${left} attempt(s) left.`;}else{let countdown=UNLOCK_DELAY;errorEl.textContent=`Access blocked. Wait ${countdown}s…`;input.disabled=true;submitBtn.disabled=true;toggleEye.style.display="none";const timer=setInterval(()=>{countdown--;if(countdown>0){errorEl.textContent=`Access blocked. Wait ${countdown}s…`;}else{clearInterval(timer);attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";errorEl.textContent="";}},1000);}}});
