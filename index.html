@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GWTPL Abohar Portal</title>
-
-<!-- 🌟 Favicon -->
 <link rel="icon" type="image/png" href="https://gwtpl.co/logo.png">
-
 <style>
   :root {
     --blue-main: #007bff;
@@ -20,225 +17,197 @@
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Arial, sans-serif;
-    overflow: hidden;
     background: linear-gradient(135deg, #ffffff, #f3f8ff);
     color: var(--text-dark);
-  }
-
-  /* 🌈 Background Gradient Mesh */
-  .mesh-bg {
-    position: fixed;
-    inset: 0;
     overflow: hidden;
-    z-index: 0;
-  }
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(70px);
-    opacity: 0.8;
-    animation: moveBlob 18s ease-in-out infinite alternate;
-  }
-  .blob1 { width: 650px; height: 650px; background: #b6d7ff; top: -150px; left: -200px; }
-  .blob2 { width: 600px; height: 600px; background: #d4e7ff; top: 60%; left: 65%; animation-delay: 2s; }
-  .blob3 { width: 550px; height: 550px; background: #9bc5ff; top: 70%; left: 10%; animation-delay: 4s; }
-  @keyframes moveBlob {
-    0% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(40px,-40px) scale(1.08); }
-    100% { transform: translate(-40px,40px) scale(0.96); }
   }
 
-  /* ☀️ Light Beam Sweep */
-  .light-beam {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(120deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 60%);
-    transform: rotate(25deg);
-    animation: beamMove 8s linear infinite;
-    pointer-events: none;
-  }
-  @keyframes beamMove {
-    0% { transform: translateX(-100%) rotate(25deg); }
-    100% { transform: translateX(100%) rotate(25deg); }
-  }
+  .mesh-bg {position: fixed;inset: 0;overflow: hidden;z-index: 0;}
+  .blob {position: absolute;border-radius: 50%;filter: blur(70px);opacity: 0.8;animation: moveBlob 18s ease-in-out infinite alternate;}
+  .blob1 {width: 650px;height: 650px;background: #b6d7ff;top: -150px;left: -200px;}
+  .blob2 {width: 600px;height: 600px;background: #d4e7ff;top: 60%;left: 65%;animation-delay: 2s;}
+  .blob3 {width: 550px;height: 550px;background: #9bc5ff;top: 70%;left: 10%;animation-delay: 4s;}
+  @keyframes moveBlob {0% {transform: translate(0,0) scale(1);}50% {transform: translate(40px,-40px) scale(1.08);}100% {transform: translate(-40px,40px) scale(0.96);}}
 
-  /* 🚀 Preloader */
-  #preloader {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-    transition: opacity 0.8s ease, visibility 0.8s ease;
-  }
-  #preloader.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
+  #preloader {position: fixed;inset: 0;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:2;transition:opacity .8s ease;}
+  #preloader.hidden{opacity:0;visibility:hidden}
+  #preloader img{width:100px;animation:floatLogo 2.2s ease-in-out infinite}
+  @keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .ring{margin-top:25px;width:60px;height:60px;border:4px solid rgba(0,0,0,0.05);border-top:4px solid var(--blue-main);border-right:4px solid var(--blue-light);border-radius:50%;animation:spin 1.1s linear infinite}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  #preloader h3{margin-top:18px;color:var(--text-dark);font-weight:600;font-size:15px}
 
-  #preloader img {
-    width: clamp(90px, 18vw, 120px);
-    height: auto;
-    animation: floatLogo 2.2s ease-in-out infinite;
-    filter: drop-shadow(0 3px 10px rgba(0,0,0,0.1));
-  }
-  @keyframes floatLogo {
-    0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-8px)}
-  }
-
-  /* Spinner */
-  .ring {
-    margin-top: 25px;
-    width: 65px;
-    height: 65px;
-    border: 4px solid rgba(0,0,0,0.05);
-    border-top: 4px solid var(--blue-main);
-    border-right: 4px solid var(--blue-light);
-    border-radius: 50%;
-    animation: spin 1.1s linear infinite;
-  }
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  #preloader h3 {
-    margin-top: 18px;
-    color: var(--text-dark);
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    font-size: 15px;
-    text-transform: uppercase;
-    animation: textFade 2s ease-in-out infinite alternate;
-  }
-  @keyframes textFade { from { opacity: 0.5; } to { opacity: 1; } }
-
-  /* ✅ Success Box */
+  /* ✅ Apple-style Success Animation */
   #success-box {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255,255,255,0.9);
-    border-radius: 18px;
-    padding: 26px 36px;
-    box-shadow: 0 10px 35px rgba(0,123,255,0.2);
-    text-align: center;
-    z-index: 5;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-    backdrop-filter: blur(10px);
+    display:none;position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%) scale(0.95);
+    background:#fff;border-radius:20px;
+    padding:30px 40px;
+    box-shadow:0 10px 35px rgba(0,123,255,0.2);
+    text-align:center;z-index:5;opacity:0;
+    transition:opacity .8s ease, transform .8s ease;
   }
-  #success-box.visible { display:block; opacity:1; }
+  #success-box.visible{display:block;opacity:1;transform:translate(-50%,-50%) scale(1);}
 
   .checkmark {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 4px solid var(--success);
+    width: 100px;
+    height: 100px;
     position: relative;
-    margin: auto;
-    animation: popIn 0.6s ease forwards;
+    display: inline-block;
   }
-  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-  .checkmark::after {
-    content: '';
+  svg {
+    width: 100px;
+    height: 100px;
+  }
+  .checkmark__circle {
+    stroke: var(--success);
+    stroke-width: 6;
+    fill: none;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 283;
+    animation: circleDraw 0.7s ease-out forwards;
+  }
+  .checkmark__check {
+    stroke: var(--success);
+    stroke-width: 6;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 70;
+    stroke-dashoffset: 70;
+    animation: checkDraw 0.4s 0.6s ease-out forwards;
+  }
+  .checkmark__pulse {
     position: absolute;
-    left: 17px;
-    top: 9px;
-    width: 16px;
-    height: 30px;
-    border-right: 4px solid var(--success);
-    border-bottom: 4px solid var(--success);
-    transform: rotate(45deg);
-    animation: drawCheck 0.6s ease 0.3s forwards;
-    opacity: 0;
-  }
-  @keyframes drawCheck {
-    from { opacity: 0; transform: scale(0) rotate(45deg); }
-    to { opacity: 1; transform: scale(1) rotate(45deg); }
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(0,179,107,0.25);
+    transform: scale(0);
+    animation: pulse 1.2s 0.9s ease-out forwards;
+    z-index: -1;
   }
 
-  #success-box h4 {
-    color: var(--blue-main);
-    font-weight: 600;
-    font-size: 16px;
-    margin-top: 12px;
-    letter-spacing: 0.5px;
+  @keyframes circleDraw {to {stroke-dashoffset: 0;}}
+  @keyframes checkDraw {to {stroke-dashoffset: 0;}}
+  @keyframes pulse {
+    0% {transform: scale(0.6);opacity: 1;}
+    70% {transform: scale(1.6);opacity: 0.4;}
+    100% {transform: scale(2.3);opacity: 0;}
   }
 
-  /* Footer */
-  .footer {
-    position: fixed;
-    bottom: 12px;
-    width: 100%;
-    text-align: center;
-    font-size: 13px;
-    color: #8aa5c6;
-    opacity: 0;
-    animation: fadeIn 2.5s ease 3s forwards;
+  #success-box h4{
+    color:var(--blue-main);font-weight:600;font-size:17px;
+    margin-top:18px;letter-spacing:0.5px;
   }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+
+  .footer{position:fixed;bottom:12px;width:100%;text-align:center;font-size:13px;color:#8aa5c6}
+  .view-logs-btn{
+    position:fixed;top:16px;right:18px;z-index:10;
+    background:linear-gradient(90deg,var(--blue-main),var(--blue-light));
+    color:#fff;border:none;padding:10px 14px;font-weight:600;border-radius:10px;
+    cursor:pointer;box-shadow:0 4px 12px rgba(0,123,255,0.2);
+    transition:transform 0.2s ease;
   }
+  .view-logs-btn:hover{transform:scale(1.05);}
+
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;justify-content:center;align-items:center;z-index:20;}
+  .modal-backdrop.visible{display:flex;}
+  .modal{width:90%;max-width:340px;background:#fff;padding:22px;border-radius:14px;box-shadow:0 12px 45px rgba(0,0,0,0.25);text-align:left;position:relative;}
+  .modal h3{margin:0 0 12px;color:var(--blue-main)}
+  .close-icon{position:absolute;top:10px;right:12px;font-size:20px;color:#999;cursor:pointer;transition:.25s}
+  .close-icon:hover{color:var(--blue-main);transform:scale(1.2)}
+  .password-wrapper{position:relative}
+  .password-wrapper input{width:100%;padding:12px 42px 12px 12px;border:1.8px solid #cfdfff;border-radius:10px;font-size:15px;outline:none;box-sizing:border-box;}
+  .password-wrapper input:focus{border-color:var(--blue-main);box-shadow:0 0 6px rgba(0,123,255,0.25);}
+  .password-wrapper .toggle-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:#6c8ebf;}
+  .modal button{padding:9px 12px;border-radius:8px;font-weight:600;border:none;cursor:pointer;margin-top:10px}
+  .modal .primary{background:var(--blue-main);color:white}
+  .modal .ghost{background:transparent;color:#6b85a8;border:1px solid #e6f0ff;margin-left:8px}
+  .error{color:red;font-size:13px;min-height:18px;margin-top:8px;font-weight:500;text-align:left}
 </style>
 </head>
 <body>
 
-<!-- 🌈 Background -->
 <div class="mesh-bg">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
   <div class="blob blob3"></div>
-  <div class="light-beam"></div>
 </div>
 
-<!-- 🚀 Preloader -->
 <div id="preloader">
   <img src="https://gwtpl.co/logo.png" alt="GWTPL Logo">
   <div class="ring"></div>
   <h3>Initializing GWTPL Abohar Portal...</h3>
 </div>
 
-<!-- ✅ Success Animation -->
+<!-- ✅ Apple Wallet–style Success -->
 <div id="success-box">
-  <div class="checkmark"></div>
+  <div class="checkmark">
+    <svg viewBox="0 0 100 100">
+      <circle class="checkmark__circle" cx="50" cy="50" r="45"></circle>
+      <path class="checkmark__check" d="M30 52 L45 67 L70 37"></path>
+    </svg>
+    <div class="checkmark__pulse"></div>
+  </div>
   <h4>Welcome to GWTPL Abohar Portal</h4>
 </div>
 
-<!-- Footer -->
+<button class="view-logs-btn" id="open-logs-btn">View Logs</button>
+
+<!-- Password Modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <span class="close-icon" id="close-modal">❌</span>
+    <h3>Enter Password</h3>
+    <div class="password-wrapper">
+      <input type="password" id="logs-password-input" placeholder="Enter password">
+      <span class="toggle-eye" id="toggle-eye">👁️</span>
+    </div>
+    <div class="error" id="modal-error"></div>
+    <button class="primary" id="logs-submit">Open Logs</button>
+    <button class="ghost" id="logs-cancel">Cancel</button>
+  </div>
+</div>
+
 <div class="footer">Powered by GWTPL Abohar Portal — by Chander Pal</div>
 
 <script>
-  // 🌐 Redirect URL
-  const redirectURL = "https://script.google.com/macros/s/AKfycbwvZfGcEC00nEu_fHxMOPWyy_NMsVtYo__YSKZ6P66pfqbKXUlf9xjMK1LKMX3VqYslJA/exec";
-  //https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?gid=0#gid=0  //data sheet
-  // Flow control
-  setTimeout(() => {
-    document.getElementById("preloader").classList.add("hidden");
+const LOGS_URL="https://docs.google.com/spreadsheets/d/1rt1-OgNmACT4zro2gSZjNDUB83V3hfvDTNMSzEqBFfA/edit?pli=1&gid=0#gid=0";
+const LOGS_PASSWORD="Chander5383";
+const redirectURL="https://script.google.com/macros/s/AKfycbwvZfGcEC00nEu_fHxMOPWyy_NMsVtYo__YSKZ6P66pfqbKXUlf9xjMK1LKMX3VqYslJA/exec";
 
-    setTimeout(() => {
-      const successBox = document.getElementById("success-box");
-      successBox.classList.add("visible");
+let redirectEnabled=true,redirectTimeout=null;
+let attempts=0;const MAX_ATTEMPTS=3,UNLOCK_DELAY=10;
 
-      // ✅ Safe redirect trigger
-      setTimeout(() => {
-        try {
-          window.location.assign(redirectURL);
-        } catch (err) {
-          window.open(redirectURL, "_self");
-        }
-      }, 900);
+const preloader=document.getElementById("preloader");
+const successBox=document.getElementById("success-box");
+const openBtn=document.getElementById("open-logs-btn");
+const backdrop=document.getElementById("modal-backdrop");
+const input=document.getElementById("logs-password-input");
+const submitBtn=document.getElementById("logs-submit");
+const cancelBtn=document.getElementById("logs-cancel");
+const errorEl=document.getElementById("modal-error");
+const toggleEye=document.getElementById("toggle-eye");
+const closeModal=document.getElementById("close-modal");
 
-    }, 600);
-  }, 2000);
+function startRedirect(){redirectTimeout=setTimeout(()=>{if(redirectEnabled)window.location.assign(redirectURL)},1200);}
+function stopRedirect(){redirectEnabled=false;clearTimeout(redirectTimeout);}
+
+openBtn.addEventListener("click",()=>{stopRedirect();backdrop.classList.add("visible");input.value="";errorEl.textContent="";attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";input.focus();});
+
+function closeModalAction(){backdrop.classList.remove("visible");redirectEnabled=true;startRedirect();}
+cancelBtn.addEventListener("click",closeModalAction);
+closeModal.addEventListener("click",closeModalAction);
+
+submitBtn.addEventListener("click",()=>{if(attempts>=MAX_ATTEMPTS){return;}if(input.value===LOGS_PASSWORD){redirectEnabled=false;backdrop.classList.remove("visible");preloader.classList.remove("hidden");preloader.querySelector("h3").textContent="Access Granted...";successBox.classList.remove("visible");setTimeout(()=>{preloader.classList.add("hidden");successBox.classList.add("visible");setTimeout(()=>{window.open(LOGS_URL,"_blank");},1500);},800);}else{attempts++;const left=MAX_ATTEMPTS-attempts;if(left>0){errorEl.textContent=`Incorrect password. ${left} attempt(s) left.`;}else{let countdown=UNLOCK_DELAY;errorEl.textContent=`Access blocked. Wait ${countdown}s…`;input.disabled=true;submitBtn.disabled=true;toggleEye.style.display="none";const timer=setInterval(()=>{countdown--;if(countdown>0){errorEl.textContent=`Access blocked. Wait ${countdown}s…`;}else{clearInterval(timer);attempts=0;input.disabled=false;submitBtn.disabled=false;toggleEye.style.display="inline";errorEl.textContent="";}},1000);}}});
+input.addEventListener("keydown",e=>{if(e.key==="Enter")submitBtn.click();});
+toggleEye.addEventListener("click",()=>{const type=input.getAttribute("type")==="password"?"text":"password";input.setAttribute("type",type);toggleEye.textContent=type==="password"?"👁️":"🙈";});
+
+setTimeout(()=>{preloader.classList.add("hidden");setTimeout(()=>{successBox.classList.add("visible");startRedirect();},600);},2000);
 </script>
-
 </body>
 </html>
